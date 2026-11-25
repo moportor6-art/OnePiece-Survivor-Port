@@ -103,6 +103,7 @@
     var cd = calculateDamage;
     calculateDamage = function () {   // eslint-disable-line no-global-assign
       var r = cd.apply(this, arguments);
+      if (r.isCrit && player.critDmgBonus) r.amount = Math.round(r.amount * (2 + player.critDmgBonus) / 2);   // Golpe crítico (tienda)
       var R = OP.run;
       R.golpes++;
       if (r.isCrit) R.crits++;

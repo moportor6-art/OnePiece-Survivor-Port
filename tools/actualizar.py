@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 BASE = 'https://opsurvivor.pages.dev/'
 WWW = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else 'app/src/main/assets/www')
-NUESTRO = {'local.js', 'css/fonts.css', 'port/mejoras.js', 'port/mejoras.css', 'port/extras.js'}
+NUESTRO = {'local.js', 'css/fonts.css', 'port/mejoras.js', 'port/mejoras.css', 'port/extras.js', 'port/tienda.js'}
 TEXTO = ('.html', '.js', '.css', '.json', '.webmanifest')
 
 
@@ -59,6 +59,8 @@ def del_port(html):
         html = html.replace('<script src="port/mejoras.js"></script>', '<script src="port/mejoras.js"></script>\n<script src="port/extras.js"></script>', 1)
     if 'src="local.js"' not in html:
         html = html.replace('<script src="js/atlas-index.js"></script>', '<script src="local.js"></script>\n<script src="js/atlas-index.js"></script>', 1)
+    if 'port/tienda.js' not in html:
+        html = html.replace('<script src="local.js"></script>', '<script src="local.js"></script>\n<script src="port/tienda.js"></script>', 1)
     return html
 
 

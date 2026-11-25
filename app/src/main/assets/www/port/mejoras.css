@@ -69,3 +69,4 @@ body.op-sin-fps #op-fps, body.op-sin-dps .op-dps { display: none; }
 .op-gris { opacity: .55; }
 .op-pant .op-scroll{display:block;max-height:62vh;overflow-y:auto;padding:0 4px}
 .op-pant .op-board{max-width:min(560px,94vw)}
+#start-screen .op-continuar{background:#a6e35a!important;color:#142b05!important;border-color:#4d7a16!important}

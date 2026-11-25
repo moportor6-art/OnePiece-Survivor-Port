@@ -198,12 +198,93 @@
   bloque('selección', function () {
     var prev = null;
     OP.guardarSel = function () { if (!prev) prev = { m: selectedMap, c: selectedCharacter, r: runCurseRank }; };
+    OP.especial = function () { return !!prev; };   // desafío diario o entrenamiento en curso
     var bm = backToMenu;
     backToMenu = function () {   // eslint-disable-line no-global-assign
       var r = bm.apply(this, arguments);
       if (prev) { selectedMap = prev.m; selectedCharacter = prev.c; runCurseRank = prev.r; prev = null; }
       return r;
     };
+  });
+
+  // ─── El botón MÚSICA del menú calla toda la música (antes solo la del menú: la de batalla volvía al jugar) ───
+  bloque('música', function () {
+    var um = updateMusic;
+    updateMusic = function () {   // eslint-disable-line no-global-assign
+      var r = um.apply(this, arguments);
+      if (windowOpts && windowOpts.menuMusicMuted) { try { menuMusic.pause(); battleMusic.pause(); } catch (e) { /* nada */ } }
+      return r;
+    };
+    var bp = HTMLMediaElement.prototype.play;   // por si algo del juego le da play directo a la de batalla
+    battleMusic.play = function () { if (windowOpts && windowOpts.menuMusicMuted) return Promise.resolve(); return bp.apply(this, arguments); };
+    menuMusic.play = function () { if (windowOpts && windowOpts.menuMusicMuted) return Promise.resolve(); return bp.apply(this, arguments); };
+    updateMusic();
+  });
+
+  // ─── Guardar y salir: la partida queda guardada y se sigue desde el menú (CONTINUAR) ───
+  bloque('guardar y salir', function () {
+    var KEY = 'op_port_partida';
+    var VARS = ['minibossesSpawned', 'mirrorMinibossSpawned', 'waveIdx', 'nextEventAt', 'endlessMode', 'endlessBossKills', 'nextBossAt',
+      '_beliBanked', '_beliStatsBanked', 'beliSrc', 'runStats'];
+    function copia(o) { return JSON.parse(JSON.stringify(o, function (k, v) { return typeof v === 'function' ? undefined : v; })); }
+    function leer() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } }
+    function guardar() {
+      var S = { v: 1, fecha: Date.now(), map: selectedMap, char: selectedCharacter, mode: runMode, curse: runCurseRank,
+        t: gameTime, beli: scoreBeli, boss: bossSpawned, bossVivo: enemies.some(function (e) { return e.isBoss; }),
+        player: copia(player), skills: copia(skills), gear: copia(Object.assign({}, gearState, { fx: [] })), w: {}, op: copia(OP.run) };
+      VARS.forEach(function (k) { if (window[k] !== undefined) S.w[k] = copia(window[k]); });
+      localStorage.setItem(KEY, JSON.stringify(S));
+    }
+    function salir() {
+      try { guardar(); } catch (e) { toast('No se pudo guardar la partida'); console.warn(e); return; }
+      backToMenu();
+      pintar();
+      toast('◉ PARTIDA GUARDADA — sigue con CONTINUAR en el menú');
+    }
+    function continuar() {
+      var S = leer(); if (!S) return pintar();
+      localStorage.removeItem(KEY);   // se juega una vez: no se puede repetir desde el mismo punto
+      selectedMap = S.map; selectedCharacter = S.char; runCurseRank = S.curse;
+      try { runMode = S.mode; } catch (e) { /* nada */ }
+      startGame();
+      var arc = $('arcana-screen'); if (arc) arc.style.display = 'none';
+      for (var k in player) if (!(k in S.player)) delete player[k];
+      Object.assign(player, S.player);
+      for (var s in S.skills) if (skills[s]) Object.assign(skills[s], S.skills[s]);
+      Object.assign(gearState, S.gear, { fx: [] });
+      for (var w in S.w) window[w] = S.w[w];
+      gameTime = S.t; scoreBeli = S.beli;
+      bossSpawned = S.boss && !S.bossVivo;   // si el jefe estaba vivo, vuelve a aparecer
+      if (S.op) OP.run = S.op;
+      enemies = []; enemyBullets = []; drops = [];
+      gameState = 'PLAYING'; lastTime = performance.now();
+      updateUI(); if (typeof gearUpdateButton === 'function') gearUpdateButton();
+      updateMusic(); pintar();
+      setTimeout(function () { toast('◉ PARTIDA RECUPERADA — ' + (CHAR_N[S.char] || S.char) + ' en ' + mapaN(S.map) + ' · ' + formatTime(S.t)); }, 400);
+    }
+    OP.continuar = continuar; OP.guardarPartida = guardar;
+    // botón en la pausa, antes de «Abandonar partida»
+    var acc = document.querySelector('#pause-screen .pz-actions');
+    var bp = document.createElement('button');
+    bp.className = 'op-btn'; bp.id = 'op-guardar-salir';
+    bp.innerHTML = '<span class="op-ic">' + ((typeof ICONS !== 'undefined' && ICONS.ship) || '') + '</span><span>Guardar y salir</span>';
+    bp.onclick = salir;
+    var ab = acc && acc.querySelector('.op-btn-danger');
+    if (acc) acc.insertBefore(bp, ab || null);
+    setInterval(function () { bp.style.display = OP.especial && OP.especial() ? 'none' : ''; }, 400);
+    // botón CONTINUAR en el menú
+    var bc = null;
+    function pintar() {
+      var S = leer();
+      if (!bc) {
+        var sec = document.querySelector('#start-screen .menu-secondary'); if (!sec) return;
+        bc = document.createElement('button'); bc.className = 'map-btn op-continuar'; bc.onclick = continuar;
+        sec.insertBefore(bc, sec.firstChild);
+      }
+      bc.style.display = S ? '' : 'none';
+      if (S) bc.innerHTML = '<span class="op-slot">▶</span> CONTINUAR · ' + esc(CHAR_N[S.char] || S.char) + ' ' + formatTime(S.t);
+    }
+    pintar();
   });
 
   // ─── Pantallas propias (mismo cartel que las del juego) ───

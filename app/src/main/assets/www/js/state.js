@@ -109,6 +109,7 @@ const META_UPGRADES = [
 let meta = { beli: 0, upgrades: {}, unlocked: { luffy: true, zoro: false, sanji: false }, wins: { baratie: 0, alabasta: 0, skypiea: 0 }, curseUnlocked: 0,
     achievements: {},
     stats: { kills: 0, elites: 0, evolves: 0, beliTotal: 0, maxTime: { baratie: 0, alabasta: 0, skypiea: 0 }, winsByChar: { luffy: 0, zoro: 0, sanji: 0 }, winsByCurse: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, killsByType: {} } };
+if (window.OPTienda) window.OPTienda(META_UPGRADES);
 META_UPGRADES.forEach(u => meta.upgrades[u.id] = 0);
 // VS: solo Poder, Salud, Velocidad, Recogida y Avaricia están desde el principio; el resto
 // se desbloquea con un logro (lock = id del desbloqueo en ACHIEVEMENTS). Lo ya comprado sigue disponible.

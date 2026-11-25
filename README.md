@@ -41,6 +41,11 @@ cofres y logros.
   - **Entrenamiento:** muñecos de práctica sin oleadas ni jefe, sin perder vida; sube de nivel y mira el daño por técnica.
   - **Bitácora:** estadísticas de todas tus partidas y 14 logros del port con premio en Berries.
   - **Radio:** qué pista suena en batalla y en el menú (o alternar en cada partida).
+  - **Guardar y salir** (en la pausa): la partida se guarda y sigue con **CONTINUAR** en el menú (una vez; si el jefe
+    estaba vivo, vuelve a aparecer).
+  - **El botón MÚSICA del menú** calla toda la música, también la de batalla.
+  - **Tienda de Berries** (`www/port/tienda.js`): las mejoras llegan a nivel 8 (Revivir a 2; en Velocidad y Área los
+    niveles nuevos dan medio efecto) y hay tres nuevas: Recuperación, Golpe crítico y Suerte.
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
   de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 

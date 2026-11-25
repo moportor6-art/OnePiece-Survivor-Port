@@ -9,6 +9,9 @@ dependa de él se apaga sola: los mods de www/port/ comprueban que el gancho exi
    (rojo por defecto) y un poco más grande; el sobrecrítico sigue morado.
 2. Gancho de ataque (game.js): antes de procesar cada ataque se guarda en window.__opAtk, para que el
    medidor de daño (www/port/danio.js) sepa de qué técnica salió cada golpe.
+3. Tienda (state.js): antes de leer el guardado se llama a window.OPTienda (www/port/tienda.js), que sube los
+   niveles máximos y añade mejoras. Si este parche no encaja, la tienda queda como la original (sin perder nada:
+   el juego devuelve los Berries de los niveles que sobren).
 """
 import os, sys
 
@@ -39,6 +42,10 @@ parche('js/render.js', 'tamaño del crítico',
 parche('js/game.js', 'gancho de ataque',
        "        const atk = activeAttacks[i];\n        atk.life -= dt;",
        "        const atk = activeAttacks[i]; window.__opAtk = atk;\n        atk.life -= dt;")
+
+parche('js/state.js', 'gancho de la tienda',
+       "META_UPGRADES.forEach(u => meta.upgrades[u.id] = 0);",
+       "if (window.OPTienda) window.OPTienda(META_UPGRADES);\nMETA_UPGRADES.forEach(u => meta.upgrades[u.id] = 0);")
 
 print(f'parches puestos: {hechos}')
 for a in avisos:

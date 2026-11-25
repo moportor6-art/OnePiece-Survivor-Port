@@ -80,6 +80,21 @@ public class MainActivity extends Activity {
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
 
+        // Pantallas de 90/120/144 Hz: pedir la frecuencia más alta (el límite de FPS está en Opciones → PORT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                android.view.Display d = getWindowManager().getDefaultDisplay();
+                android.view.Display.Mode cur = d.getMode(), best = cur;
+                for (android.view.Display.Mode m : d.getSupportedModes()) {
+                    if (m.getPhysicalWidth() == cur.getPhysicalWidth() && m.getPhysicalHeight() == cur.getPhysicalHeight()
+                            && m.getRefreshRate() > best.getRefreshRate()) best = m;
+                }
+                WindowManager.LayoutParams lp = w.getAttributes();
+                lp.preferredDisplayModeId = best.getModeId();
+                w.setAttributes(lp);
+            } catch (Exception ignored) { }
+        }
+
         web = new WebView(this);
         web.setBackgroundColor(Color.BLACK);
         setContentView(web);
@@ -250,6 +265,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        // Al minimizar o salir: el juego pausa la partida y calla la música y los efectos (local.js opSilencio)
+        web.evaluateJavascript("window.opSilencio&&opSilencio(true)", null);
         web.onPause();   // el juego detecta que se ocultó, pausa y guarda
     }
 
@@ -257,6 +274,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         web.onResume();
+        web.evaluateJavascript("window.opSilencio&&opSilencio(false)", null);   // vuelve solo la música que toca
     }
 
     @Override

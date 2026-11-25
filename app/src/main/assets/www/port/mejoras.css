@@ -1,0 +1,41 @@
+/* Mejoras del port (port/mejoras.js): mismo estilo de pergamino y tinta que el juego */
+#op-crit{position:absolute;top:44px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;font-family:Bangers,sans-serif;
+  letter-spacing:1.5px;font-size:15px;color:#fff;background:rgba(10,8,6,.55);border:2px solid #ff3b30;border-radius:9px;padding:1px 10px;white-space:nowrap}
+#op-crit b{color:#ff3b30;font-weight:400}#op-crit small{color:#ffd65a;font-size:12px}
+body.op-sin-critcont #op-crit{display:none!important}
+#op-mini{position:absolute;right:10px;bottom:10px;z-index:5;width:104px;height:104px;pointer-events:none;opacity:.92}
+body.op-sin-mini #op-mini{display:none!important}
+@media (max-height:500px){#op-mini{width:84px;height:84px;bottom:70px}#op-crit{top:34px;font-size:13px}}
+#op-pausa-dano{grid-column:1/-1;margin-top:6px}
+.op-crit-res{font-size:14px;margin:4px 0 2px;color:inherit}
+.op-dano{display:flex;flex-direction:column;gap:4px;margin:4px 0}
+.op-dano-f{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;align-items:center;gap:8px;font-size:13px}
+.op-dano-f span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-dano-f i{display:block;height:9px;border-radius:5px;background:linear-gradient(90deg,#ff3b30,#ffb347);min-width:3px}
+.op-dano-f b{font-weight:700;font-size:12px;white-space:nowrap}
+.op-evo{font-size:13px;margin:3px 0}.op-evo small{opacity:.75}
+.op-final{max-width:640px;margin:10px auto 0;padding:10px 16px}
+.op-graf{display:block;width:100%;height:60px;margin-top:6px;background:rgba(0,0,0,.06);border-radius:6px}
+.op-graf-l{display:block;font-size:11px;opacity:.7;text-align:center}
+#op-hud-ed{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.35);touch-action:none}
+.op-hud-bar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+  background:#f3e2bd;color:#241508;border:3px solid #241508;border-radius:10px;padding:6px 10px;font-family:Bangers,sans-serif;letter-spacing:1px;max-width:96vw}
+.op-hud-bar span{font-family:sans-serif;font-size:12px;letter-spacing:0}
+.op-hud-bar button{font:inherit;font-size:16px;padding:3px 12px;border-radius:7px;border:2px solid #241508;background:#fff7e0;cursor:pointer}
+.op-hud-bar button.ok{background:#d62828;color:#fff}
+.op-hud-p{position:absolute;border:2px dashed #ffd65a;background:rgba(255,214,90,.18);color:#fff;font:700 11px sans-serif;
+  display:flex;align-items:flex-start;justify-content:center;text-shadow:0 1px 2px #000;border-radius:6px;cursor:move;min-width:30px;min-height:24px}
+.op-hud-p.sel{border-color:#ff3b30;background:rgba(255,59,48,.22)}
+#op-misiones .op-scroll{display:block;max-height:62vh;overflow-y:auto;padding:0 4px}
+.op-mis{display:flex;align-items:center;gap:10px;margin:7px 0;padding:7px 10px;border:2px solid rgba(36,21,8,.35);border-radius:9px;background:rgba(255,255,255,.35);color:#241508}
+.op-mis>div{flex:1}.op-mis b{display:block;font-size:14px}.op-mis small{font-size:12px;opacity:.8}
+.op-mis i{display:block;height:7px;border-radius:4px;background:rgba(36,21,8,.18);margin-top:4px;overflow:hidden}
+.op-mis i u{display:block;height:100%;background:linear-gradient(90deg,#d62828,#facc15)}
+.op-mis button,.op-todo{font-family:Bangers,sans-serif;letter-spacing:1px;font-size:16px;padding:5px 12px;border-radius:8px;border:2px solid #241508;background:#facc15;color:#241508;cursor:pointer}
+.op-todo{display:block;margin:6px auto 4px;background:#d62828;color:#fff}
+.op-mis-ok{font-size:20px;color:#2e7d32}
+.op-hist-t{text-align:center;margin:14px 0 4px}.op-hist-rec,.op-hist-v{text-align:center;font-size:14px;margin:4px 0}
+.op-hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:6px}
+.op-hist-f{border:2px solid rgba(36,21,8,.35);border-radius:9px;padding:6px 9px;background:rgba(255,255,255,.45);font-size:13px;color:#241508;font-family:sans-serif;letter-spacing:0;text-shadow:none}
+.op-hist-rec{color:#241508;font-family:sans-serif;letter-spacing:0;text-shadow:none}
+.op-hist-f span{display:block;font-weight:700}.op-hist-f small{display:block;opacity:.7;font-size:11px}.op-hist-f b{display:block;font-size:12px;margin-top:2px}

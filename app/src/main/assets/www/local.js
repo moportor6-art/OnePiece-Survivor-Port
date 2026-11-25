@@ -17,6 +17,31 @@
     }
   } catch (e) { /* nada */ }
 
+  // ─── 1b. Al minimizar o salir, la música se calla de verdad ───
+  // Android deja sonar las pistas <audio> aunque la app esté en segundo plano. Se apuntan todas las que crea el
+  // juego y, al ocultarse (aviso de la app o visibilitychange, también en Windows), se pausan junto con los
+  // efectos (AudioContext); al volver, el juego decide qué música toca (updateMusic) y la partida sigue en pausa.
+  var pistas = [], A0 = window.Audio, oculto = false;
+  if (A0) {
+    window.Audio = function (src) { var a = new A0(src); pistas.push(a); return a; };
+    window.Audio.prototype = A0.prototype;
+  }
+  window.opSilencio = function (on) {
+    if (on === oculto) return;
+    oculto = on;
+    if (on) {
+      try { if (typeof gameState !== 'undefined' && gameState === 'PLAYING' && typeof togglePause === 'function') togglePause(); } catch (e) { /* nada */ }
+      pistas.forEach(function (a) { try { a.pause(); } catch (e) { /* nada */ } });
+      document.querySelectorAll('audio,video').forEach(function (a) { try { a.pause(); } catch (e) { /* nada */ } });
+      try { if (typeof audioCtx !== 'undefined' && audioCtx && audioCtx.state === 'running') audioCtx.suspend(); } catch (e) { /* nada */ }
+    } else {
+      try { if (typeof audioCtx !== 'undefined' && audioCtx && window._audioUnlocked) audioCtx.resume(); } catch (e) { /* nada */ }
+      try { if (typeof updateMusic === 'function') updateMusic(); } catch (e) { /* nada */ }
+    }
+  };
+  document.addEventListener('visibilitychange', function () { window.opSilencio(document.hidden); });
+  window.addEventListener('pagehide', function () { window.opSilencio(true); });
+
   // ─── 2. Nada sale a internet: la nube (api/) responde «sin conexión» al instante ───
   var f0 = window.fetch;
   window.fetch = function (u) {

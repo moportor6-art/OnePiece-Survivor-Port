@@ -20,6 +20,19 @@ cofres y logros.
   y publica una versión (`tools/actualizar.py`, `.github/workflows/actualizar.yml`).
 - **Atrás de Android:** en partida pausa, en una ventana la cierra y en el menú pregunta antes de salir.
 - Pantalla completa en horizontal y la pantalla no se apaga mientras juegas.
+- **Al minimizar o salir**, la partida se pausa y la música y los efectos se callan de verdad (en Android seguían sonando).
+- **Mejoras del port** (`www/port/`, sin tocar el juego; Opciones → PORT):
+  - **Críticos:** el número sale en **rojo**, más grande y con «!», y un **contador** en pantalla (críticos y % de la partida).
+    En la pausa: críticos, sobrecríticos y tu probabilidad. Récord de críticos en Récords.
+  - **Límite de FPS** (sin límite, 120, 60, 30) y la app usa la frecuencia más alta de la pantalla (90/120/144 Hz).
+  - **Joystick** flotante o fijo, de tres tamaños y con zona muerta; **vibración** al recibir golpes, subir de nivel y llegar un jefe.
+  - **Daño por técnica** en la pausa (con las evoluciones que te faltan) y al terminar, con una **gráfica** del daño.
+  - **Minimapa** con enemigos, élites, cofres y jefes.
+  - **Editor del HUD** (Pausa → Editar HUD): mover y cambiar el tamaño de cada pieza.
+  - **Misiones** diarias y semanales con premio en Berries y «Cobrar todo».
+  - **Historial** de las últimas 30 partidas (con su gráfica) en Récords.
+- `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
+  de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 
 ## Cómo está hecho
 

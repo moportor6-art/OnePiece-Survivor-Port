@@ -346,9 +346,9 @@ function render() {
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
     for (let dtObj of damageTexts) {
         if (!onScreen(dtObj.x, dtObj.y, 40)) continue;
-        const font = dtObj.isOvercrit ? '900 17px Bangers, Arial, sans-serif' : (dtObj.isCrit ? 'bold 15px Bangers, Arial, sans-serif' : '12px sans-serif');
+        const font = dtObj.isOvercrit ? '900 17px Bangers, Arial, sans-serif' : (dtObj.isCrit ? 'bold 18px Bangers, Arial, sans-serif' : '12px sans-serif');
         if (font !== _lastFont) { ctx.font = font; _lastFont = font; }
-        ctx.fillStyle = dtObj.isOvercrit ? '#c084fc' : (dtObj.isCrit ? '#facc15' : '#ffffff');
+        ctx.fillStyle = dtObj.isOvercrit ? '#c084fc' : (dtObj.isCrit ? (window.OPCritColor || '#ff3b30') : '#ffffff');
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
         ctx.lineWidth = dtObj.isOvercrit ? 4 : (dtObj.isCrit ? 3.5 : 3);
         ctx.strokeText(dtObj.text, dtObj.x, dtObj.y);

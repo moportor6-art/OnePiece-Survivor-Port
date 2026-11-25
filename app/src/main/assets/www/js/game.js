@@ -259,7 +259,7 @@ function update(dt) {
 
     vfxUpdate(dt);
     for (let i = activeAttacks.length - 1; i >= 0; i--) {
-        const atk = activeAttacks[i];
+        const atk = activeAttacks[i]; window.__opAtk = atk;
         atk.life -= dt;
         if (ARSENAL_TYPES.has(atk.type)) { if (updateArsenalAttack(atk, dt)) activeAttacks.splice(i, 1); continue; }
 

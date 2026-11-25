@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 BASE = 'https://opsurvivor.pages.dev/'
 WWW = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else 'app/src/main/assets/www')
-NUESTRO = {'local.js', 'css/fonts.css'}
+NUESTRO = {'local.js', 'css/fonts.css', 'port/mejoras.js', 'port/mejoras.css'}
 TEXTO = ('.html', '.js', '.css', '.json', '.webmanifest')
 
 
@@ -51,6 +51,10 @@ def del_port(html):
     html = re.sub(r'\s*<link rel="preconnect" href="https://fonts\.googleapis\.com">', '', html)
     html = re.sub(r'<link href="https://fonts\.googleapis\.com/css2[^"]*" rel="stylesheet">', '<link href="css/fonts.css" rel="stylesheet">', html)
     html = re.sub(r'\s*<script src="https://static\.itch\.io/[^"]*"></script>', '', html)
+    if 'port/mejoras.css' not in html:
+        html = html.replace('<link rel="stylesheet" href="css/style.css">', '<link rel="stylesheet" href="css/style.css">\n    <link rel="stylesheet" href="port/mejoras.css">', 1)
+    if 'port/mejoras.js' not in html:
+        html = html.replace('<script src="js/main.js"></script>', '<script src="js/main.js"></script>\n<script src="port/mejoras.js"></script>', 1)
     if 'src="local.js"' not in html:
         html = html.replace('<script src="js/atlas-index.js"></script>', '<script src="local.js"></script>\n<script src="js/atlas-index.js"></script>', 1)
     return html
@@ -107,6 +111,10 @@ with ThreadPoolExecutor(12) as ex:
     for a, d in ex.map(uno, falta):
         if d is not None:
             guardar(a, d)
+
+# 3. Los parches del port (críticos en rojo, gancho del medidor de daño)
+import subprocess
+subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'parches.py'), WWW], check=False)
 
 print(f'{len(vistos)} de texto, {len(assets)} recursos · versión de la caché {ver(open(os.path.join(WWW, "sw.js"), encoding="utf-8").read())}')
 for c in cambios[:40]:

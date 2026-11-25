@@ -9,7 +9,7 @@
   'use strict';
   var KEY = 'op_port_opts';
   var DEF = { critRojo: true, critCont: true, critMarca: true, fps: 0, joy: 'flotante', joyTam: 'normal', joyZona: 10,
-    vibra: true, mini: true };
+    vibra: true, mini: true, auto: false, saltar: false, fpsCont: true, dps: true, flechas: true, musBat: 'battle', musMenu: 'menu' };
   var O = {};
   try { O = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) { O = Object.assign({}, DEF); }
   function guardar() { try { localStorage.setItem(KEY, JSON.stringify(O)); } catch (e) { /* nada */ } aplicar(); }
@@ -29,6 +29,7 @@
     window.OPCritColor = O.critRojo ? '#ff3b30' : '#facc15';
     document.body.classList.toggle('op-sin-critcont', !O.critCont);
     document.body.classList.toggle('op-sin-mini', !O.mini);
+    if (OP.aplicarExtras) OP.aplicarExtras();
     if (OP.aplicarHud) OP.aplicarHud();
   }
 
@@ -56,6 +57,13 @@
     ['sel', 'joyZona', 'Zona muerta', [[0, 'Ninguna'], [10, '10%'], [20, '20%'], [30, '30%']], 'pad'],
     ['tog', 'vibra', 'Vibración', 'golpes, nivel y jefes', 'sound'],
     ['tog', 'mini', 'Minimapa', 'cofres y jefes', 'ship'],
+    ['tog', 'flechas', 'Flechas al jefe y los cofres', 'en el borde de la pantalla', 'ship'],
+    ['tog', 'auto', 'Auto-aprender', 'elige las mejoras sin pausar (botón AUTO en partida)', 'up'],
+    ['tog', 'saltar', 'Saltar animaciones', 'ruleta de cofres y evoluciones', 'fastforward'],
+    ['tog', 'dps', 'Daño por segundo en vivo', '', 'power'],
+    ['tog', 'fpsCont', 'Contador de FPS', '', 'gauge'],
+    ['sel', 'musBat', 'Música de batalla', [['battle', 'Batalla'], ['menu', 'La del menú'], ['alterna', 'Alternar en cada partida']], 'sound'],
+    ['sel', 'musMenu', 'Música del menú', [['menu', 'Menú'], ['battle', 'La de batalla']], 'sound'],
   ];
   bloque('opciones', function () {
     var caja = null;
@@ -120,6 +128,7 @@
       var R = OP.run;
       el.style.display = jugando() || (typeof gameState !== 'undefined' && gameState === 'PAUSED') ? '' : 'none';
       $('op-crit-n').textContent = R.crits + (R.sobre ? ' (+' + R.sobre + ')' : '');
+      if (OP.dpsTxt) OP.dpsTxt();
       $('op-crit-p').textContent = (R.golpes ? Math.round(R.crits * 100 / R.golpes) : 0) + '%';
     }, 250);
   });
@@ -298,7 +307,8 @@
   bloque('hud', function () {
     var HKEY = 'op_port_hud';
     var PIEZAS = [['.hud-top .player-status', 'Cartel de vida'], ['#time-top', 'Tiempo'], ['#pause-btn', 'Pausa'],
-      ['#gear-btn', 'Botón de Gear'], ['#weapons-hud', 'Técnicas'], ['#op-crit', 'Críticos'], ['#op-mini', 'Minimapa']];
+      ['#gear-btn', 'Botón de Gear'], ['#weapons-hud', 'Técnicas'], ['#op-crit', 'Críticos'], ['#op-mini', 'Minimapa'],
+      ['#op-auto', 'Botón AUTO'], ['#op-fps', 'FPS']];
     var H = {};
     try { H = JSON.parse(localStorage.getItem(HKEY)) || {}; } catch (e) { H = {}; }
     OP.aplicarHud = function () {
@@ -403,6 +413,7 @@
     }
     OP.alTerminar = function (gano, tot) {
       var R = OP.run;
+      if (OP.extrasFin) try { OP.extrasFin(gano, tot); } catch (e) { /* nada */ }
       sumar('kills', window.lastRun ? window.lastRun.kills : 0); sumar('tiempo', Math.floor(gameTime)); sumar('crits', R.crits);
       sumar('partidas', 1); if (gano) sumar('victorias', 1); sumar('jefes', R.jefesMuertos || 0); sumar('cofres', R.cofres); sumar('dano', Math.round(tot));
       guardarM();

@@ -31,6 +31,16 @@ cofres y logros.
   - **Editor del HUD** (Pausa → Editar HUD): mover y cambiar el tamaño de cada pieza.
   - **Misiones** diarias y semanales con premio en Berries y «Cobrar todo».
   - **Historial** de las últimas 30 partidas (con su gráfica) en Récords.
+  - **AUTO** (botón en partida, se activa y desactiva): aprende las mejoras al subir de nivel **sin pausar**; prioriza
+    subir lo que ya tienes y los objetos que piden tus evoluciones. Los cofres se recogen solos y avisan qué traían.
+  - **Saltar animaciones:** la ruleta de los cofres se resuelve al instante y la evolución dura menos.
+  - **Contador de FPS** y **daño por segundo** en vivo junto al de críticos.
+  - **Flechas** en el borde de la pantalla hacia el jefe y los cofres (con la distancia).
+  - **Desafío diario:** misma isla, personaje y clima para todos cada día (aunque no estén desbloqueados), marca del día,
+    racha de días seguidos y premio en Berries.
+  - **Entrenamiento:** muñecos de práctica sin oleadas ni jefe, sin perder vida; sube de nivel y mira el daño por técnica.
+  - **Bitácora:** estadísticas de todas tus partidas y 14 logros del port con premio en Berries.
+  - **Radio:** qué pista suena en batalla y en el menú (o alternar en cada partida).
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
   de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 

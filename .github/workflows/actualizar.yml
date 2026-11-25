@@ -1,0 +1,38 @@
+name: One Piece Survivor al día
+
+# Todos los días mira opsurvivor.pages.dev (la web de PXVLO); si hay algo nuevo (código, islas, personajes, sprites,
+# música…), lo baja, lo sube al repositorio y compila. La app lo recibe sola con su actualizador (solo baja lo que
+# cambió) y el Port Launcher en Windows también.
+on:
+  schedule:
+    - cron: '23 10 * * *'   # 4:23 en México
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: actualizar
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: Bajar lo nuevo de opsurvivor.pages.dev
+        run: python3 -I tools/actualizar.py app/src/main/assets/www
+      - name: Subir si cambió y compilar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then echo "Ya estaba al día"; exit 0; fi
+          git config user.name "moportor6-art"
+          git config user.email "moportor6-art@users.noreply.github.com"
+          git add -A app/src/main/assets/www
+          V=$(grep -oP "CACHE_VER = '\K[^']+" app/src/main/assets/www/sw.js || echo "?")
+          git commit -m "One Piece Survivor al día ($(date -u +%Y-%m-%d), versión de la web $V)"
+          git push origin HEAD:main
+          gh workflow run build-apk.yml --ref main

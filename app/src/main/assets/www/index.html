@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>One Piece: Grand Line Survivor</title>
+    <meta name="description" content="Survivor pirata fan-made de One Piece: sobrevive 8 minutos al caos del Grand Line, forja tu build y derrota al boss del mapa.">
+    <meta name="theme-color" content="#0b1220">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Compartir en redes: tarjeta con sombrero de paja -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="One Piece: Grand Line Survivor">
+    <meta property="og:description" content="Survivor pirata fan-made: sobrevive 8 minutos, forja tu build y derrota al boss del mapa.">
+    <meta property="og:url" content="https://opsurvivor.pages.dev/">
+    <meta property="og:image" content="https://opsurvivor.pages.dev/assets/icons/icon-512.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- PWA: instalable en movil a pantalla completa -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="assets/icons/favicon-48.png" sizes="48x48" type="image/png">
+    <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <link href="css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="player-status">
+                <div class="avatar-box"><img id="hud-portrait" src="assets/sprites/ui/sprite_000.png" alt="Personaje" onerror="this.style.display='none'"></div>
+                <div class="bars-container">
+                    <div class="poster-head">
+                        <span class="poster-wanted">WANTED</span>
+                        <span class="poster-lv">NV. <span id="level-txt">1</span></span>
+                    </div>
+                    <div class="poster-name" id="hud-name">MONKEY D. LUFFY</div>
+                    <div class="bar-label">
+                        <span>SALUD</span>
+                        <span id="hp-text">100/100</span>
+                    </div>
+                    <div class="bar-outer">
+                        <div id="hp-bar" class="bar-inner-hp"></div>
+                    </div>
+                    <div class="bar-outer bar-xp" title="Experiencia">
+                        <div id="xp-bar" class="bar-inner-xp"></div>
+                    </div>
+                    <div class="poster-bounty"><span class="beli">฿</span><span id="score-txt">0</span>-</div>
+                </div>
+            </div>
+
+            <div class="stats-box">
+                <button id="pause-btn" onclick="togglePause()" style="display:none;"><span data-ico="pauseIco"></span> Pausa</button>
+            </div>
+        </div>
+
+        <div id="time-top">
+            <span data-ico="clock"></span> <span id="time-txt">00:00</span>
+        </div>
+
+        <div id="joystick-zone"><div id="joystick-knob"></div></div>
+    </div>
+
+    <!-- Weapons HUD -->
+    <div id="weapons-hud"></div>
+
+    <!-- Pause Screen: cartel con la bitácora de la partida (armas, objetos y estadísticas) y los ajustes -->
+    <div id="pause-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board op-board pz-board">
+            <div class="op-head">
+                <div class="wanted-title op-title">PAUSA</div>
+                <div class="pz-chips">
+                    <span class="pz-chip" id="pz-char">Luffy</span>
+                    <span class="pz-chip"><span class="op-slot" data-ico="ship"></span> <span id="pz-map">Baratie</span></span>
+                    <span class="pz-chip"><span class="op-slot" data-ico="clock"></span> <span id="pz-time">00:00</span></span>
+                    <span class="pz-chip">Nv <span id="pz-level">1</span></span>
+                    <span class="pz-chip pz-gold">฿ <span id="pz-beli">0</span></span>
+                </div>
+            </div>
+            <div class="op-scroll pz-body">
+                <div class="pz-log" id="pause-info-panel">
+                    <div class="op-section"><span>ARMAS</span><small id="pz-wcount">0</small></div>
+                    <div class="pz-slots" id="pause-weapons"></div>
+                    <div class="op-section"><span>OBJETOS</span><small id="pz-pcount">0</small></div>
+                    <div class="pz-slots" id="pause-passives"></div>
+                    <div class="op-section"><span>ESTADÍSTICAS</span></div>
+                    <div class="pz-stats" id="pause-stats"></div>
+                </div>
+                <div class="pz-side">
+                    <div class="op-section"><span>AJUSTES</span></div>
+                    <div class="op-row op-slider"><span class="op-ic" data-ico="gauge"></span><label for="vol-master">General</label>
+                        <input type="range" min="0" max="100" value="80" id="vol-master" oninput="setVolMaster(this.value)"><b class="op-val" id="vol-master-val">80</b></div>
+                    <div class="op-row op-slider"><span class="op-ic" data-ico="sound"></span><label for="vol-music">Música</label>
+                        <input type="range" min="0" max="100" value="80" id="vol-music" oninput="setVolMusic(this.value)"><b class="op-val" id="vol-music-val">80</b></div>
+                    <div class="op-row op-slider"><span class="op-ic" data-ico="crit"></span><label for="vol-sfx">Efectos</label>
+                        <input type="range" min="0" max="100" value="80" id="vol-sfx" oninput="setVolSfx(this.value)" onchange="playSound('ui')"><b class="op-val" id="vol-sfx-val">80</b></div>
+                    <div class="pz-actions">
+                        <button class="op-btn" onclick="toggleSound()"><span class="op-ic" id="sound-icon" data-ico="sound"></span><span>Sonido: <b id="sound-label">Activado</b></span></button>
+                        <button class="op-btn" id="fs-card" onclick="toggleFullscreen()"><span class="op-ic" data-ico="full"></span><span>Pantalla completa</span></button>
+                        <button class="op-btn" onclick="showControls()"><span class="op-ic" data-ico="pad"></span><span>Controles</span></button>
+                        <button class="op-btn op-btn-danger" onclick="backToMenu()"><span class="op-ic" data-ico="home"></span><span>Abandonar partida</span></button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-start op-foot" onclick="resumeGame()"><span class="op-slot" data-ico="play"></span> REANUDAR</button>
+        </div>
+    </div>
+
+    <!-- Controls Help Screen -->
+    <div id="controls-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board" style="max-width: 420px;">
+            <div class="wanted-title" style="font-size: 32px;">CONTROLES</div>
+            <div class="wanted-subtitle">CÓMO JUGAR</div>
+            <div style="text-align:left; color:#3d2314; font-size:14px; line-height:1.6; margin: 12px 0;">
+                <p><b>WASD / Flechas:</b> Mover</p>
+                <p><b>Joystick:</b> Mover (táctil)</p>
+                <p><b>ESC / P:</b> Pausar</p>
+                <p><b>Objetivo:</b> Sobrevive 8 minutos y derrota al boss del mapa.</p>
+                <p><b>Mejoras:</b> Al subir de nivel elige una carta.</p>
+            </div>
+            <button class="btn-start" onclick="document.getElementById('controls-screen').style.display='none'; document.getElementById('pause-screen').style.display='flex';">Volver</button>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="overlay-screen" style="background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('assets/bg/start-bg.jpg') center/cover no-repeat;">
+
+        <div class="title-container">
+            <div class="op-logo-main">ONE PIECE</div>
+            <div class="op-logo-sub">SURVIVOR</div>
+        </div>
+        <p class="op-tagline" style="max-width: 520px; text-align: center; margin-bottom: 24px; font-size: 17px; line-height: 1.4;">
+            ¡Monta tu tripulación de un solo hombre y sobrevive 8 minutos al caos del Grand Line!<br>
+            Recoge Berries, forja tu build y derrota al boss del mapa.
+        </p>
+        <div id="char-select" style="display: flex; gap: 40px; margin: 14px 0 18px; flex-wrap: wrap; justify-content: center; align-items: stretch; position: relative; width: 100%; max-width: 960px;">
+            <span class="side-deco side-left" aria-hidden="true">⚓</span>
+            <span class="side-deco side-right" aria-hidden="true">⚓</span>
+            <button class="char-card" data-char="luffy" onclick="selectCharacter('luffy')">
+                <img src="assets/wanted/luffy.jpg" alt="Luffy" onerror="this.style.display='none'">
+            </button>
+            <button class="char-card" data-char="zoro" onclick="selectCharacter('zoro')">
+                <img src="assets/wanted/zoro.jpg" alt="Zoro" onerror="this.style.display='none'">
+            </button>
+            <button class="char-card crew" data-char="usopp" onclick="selectCharacter('usopp')"><img src="assets/wanted/usopp.jpg" alt="Usopp"></button>
+            <button class="char-card" data-char="sanji" onclick="selectCharacter('sanji')">
+                <img src="assets/wanted/sanji.jpg" alt="Sanji" onerror="this.style.display='none'">
+            </button>
+            <button class="char-card crew" data-char="nami" onclick="selectCharacter('nami')"><img src="assets/wanted/nami.jpg" alt="Nami"></button>
+            <button class="char-card crew" data-char="chopper" onclick="selectCharacter('chopper')"><img src="assets/wanted/chopper.jpg" alt="Chopper"></button>
+            <button class="char-card crew" data-char="robin" onclick="selectCharacter('robin')"><img src="assets/wanted/robin.jpg" alt="Robin"></button>
+            <button class="char-card crew" data-char="franky" onclick="selectCharacter('franky')"><img src="assets/wanted/franky.jpg" alt="Franky"></button>
+            <button class="char-card crew" data-char="brook" onclick="selectCharacter('brook')"><img src="assets/wanted/brook.jpg" alt="Brook"></button>
+            <button class="char-card crew" data-char="jinbe" onclick="selectCharacter('jinbe')"><img src="assets/wanted/jinbe.jpg" alt="Jinbe"></button>
+        </div>
+        <div id="char-selected" class="menu-name">Personaje: Luffy</div>
+        <div id="char-stats" class="char-stats"></div>
+        <div class="menu-panel">
+        <div id="map-select" style="display:flex; gap:16px; margin: 8px 0 12px; flex-wrap:wrap; justify-content:center; align-items:center;">
+            <span class="menu-label">ELIGE ISLA <small class="map-danger-hint">peligro creciente ➜</small></span>
+            <button class="map-btn" data-map="shelltown" onclick="selectMap('shelltown')"><span class="op-slot" data-ico="hat"></span> Shell Town</button>
+            <button class="map-btn" data-map="syrup" onclick="selectMap('syrup')"><span class="op-slot" data-ico="ship"></span> Syrup</button>
+            <button class="map-btn" data-map="baratie" onclick="selectMap('baratie')"><span class="op-slot" data-ico="ship"></span> Baratie</button>
+            <button class="map-btn" data-map="arlongpark" onclick="selectMap('arlongpark')"><span class="op-slot" data-ico="drop"></span> Arlong Park</button>
+            <button class="map-btn" data-map="drum" onclick="selectMap('drum')"><span class="op-slot" data-ico="skull"></span> Drum</button>
+            <button class="map-btn" data-map="alabasta" onclick="selectMap('alabasta')"><span class="op-slot" data-ico="dune"></span> Alabasta</button>
+            <button class="map-btn" data-map="skypiea" onclick="selectMap('skypiea')"><span class="op-slot" data-ico="cloud"></span> Skypiea</button>
+            <button class="map-btn" data-map="water7" onclick="selectMap('water7')"><span class="op-slot" data-ico="ship"></span> Water 7</button>
+            <button class="map-btn" data-map="enieslobby" onclick="selectMap('enieslobby')"><span class="op-slot" data-ico="gauge"></span> Enies Lobby</button>
+            <button class="map-btn" data-map="thrillerbark" onclick="selectMap('thrillerbark')"><span class="op-slot" data-ico="skull"></span> Thriller Bark</button>
+            <button class="map-btn" data-map="marineford" onclick="selectMap('marineford')"><span class="op-slot" data-ico="hat"></span> Marineford</button>
+            <button class="map-btn" data-map="wholecake" onclick="selectMap('wholecake')"><span class="op-slot" data-ico="heart"></span> Whole Cake</button>
+            <button class="map-btn" data-map="wano" onclick="selectMap('wano')"><span class="op-slot" data-ico="skull"></span> Wano</button>
+        </div>
+        <div id="map-selected" class="menu-hidden">Mapa: Shell Town</div>
+        <div id="curse-select" style="display:flex; gap:12px; margin: 4px 0 12px; flex-wrap:wrap; justify-content:center; align-items:center;">
+            <span class="menu-label">CLIMA PELIGROSO</span>
+            <button class="map-btn curse-btn" data-curse="0" onclick="selectCurse(0)">0</button>
+            <button class="map-btn curse-btn" data-curse="1" onclick="selectCurse(1)">1</button>
+            <button class="map-btn curse-btn" data-curse="2" onclick="selectCurse(2)">2</button>
+            <button class="map-btn curse-btn" data-curse="3" onclick="selectCurse(3)">3</button>
+            <button class="map-btn curse-btn" data-curse="4" onclick="selectCurse(4)">4</button>
+            <span id="curse-desc"></span>
+        </div>
+        <div id="mode-select" style="display:flex; gap:12px; margin: 0 0 10px; flex-wrap:wrap; justify-content:center; align-items:center;">
+            <span class="menu-label">MODO</span>
+            <button class="map-btn mode-btn selected" data-mode="normal" onclick="selectMode('normal')">Normal</button>
+            <button class="map-btn mode-btn" data-mode="haki" onclick="selectMode('haki')">Haki</button>
+            <button class="map-btn mode-btn" data-mode="inverso" onclick="selectMode('inverso')">Inverso</button>
+            <span id="mode-desc"></span>
+        </div>
+        </div>
+        <div class="menu-secondary">
+            <button class="map-btn" onclick="showAchievements()"><span class="op-slot" data-ico="hat"></span> LOGROS</button>
+            <button class="map-btn" onclick="showCollection()"><span class="op-slot" data-ico="skull"></span> COLECCIÓN</button>
+            <button class="map-btn" onclick="showRecords()"><span class="op-slot" data-ico="clock"></span> RÉCORDS</button>
+            <button class="map-btn" onclick="showOptions()"><span class="op-slot" data-ico="gear"></span> OPCIONES</button>
+            <button class="map-btn" id="btn-menu-music" onclick="toggleMenuMusic()"><span class="op-slot" id="menu-music-ico" data-ico="sound"></span> MÚSICA: <span id="menu-music-label">ON</span></button>
+        </div>
+        <button class="btn-start btn-sail" onclick="startGame()">¡ZARPAR AL COMBATE!</button>
+        <button class="btn-gold" onclick="showShop()"><span class="op-slot" data-ico="cart"></span> TIENDA DEL MUNDO — Berries: <span id="meta-beli" style="color:#ffd94a">฿0</span></button>
+    </div>
+
+    <!-- Pantalla de titulo: el primer gesto desbloquea el audio (politica de autoplay) -->
+    <div id="press-start" role="button" tabindex="0" aria-label="Haz clic para empezar">
+        <div class="ps-rays" aria-hidden="true"></div>
+        <div class="ps-content">
+            <div class="ps-jolly" aria-hidden="true">
+                <svg viewBox="0 0 120 110" width="120" height="110">
+                    <g stroke="#17110a" stroke-width="4" stroke-linecap="round">
+                        <line x1="14" y1="96" x2="106" y2="20"/><line x1="14" y1="20" x2="106" y2="96"/>
+                    </g>
+                    <g fill="#f3e2bd" stroke="#17110a" stroke-width="3">
+                        <circle cx="10" cy="98" r="7"/><circle cx="110" cy="18" r="7"/><circle cx="10" cy="18" r="7"/><circle cx="110" cy="98" r="7"/>
+                        <path d="M30 58 a30 30 0 0 1 60 0 v12 a8 8 0 0 1 -8 8 h-4 v10 h-36 v-10 h-4 a8 8 0 0 1 -8 -8 z"/>
+                    </g>
+                    <circle cx="48" cy="62" r="7" fill="#17110a"/><circle cx="72" cy="62" r="7" fill="#17110a"/>
+                    <path d="M56 76 l4 -6 l4 6 z" fill="#17110a"/>
+                    <path d="M14 46 q46 -16 92 0 l-8 6 q-38 -10 -76 0 z" fill="#d62828" stroke="#17110a" stroke-width="3"/>
+                    <path d="M28 42 q4 -30 32 -32 q28 2 32 32 q-32 -8 -64 0 z" fill="#facc15" stroke="#17110a" stroke-width="3"/>
+                    <path d="M29 38 q31 -8 62 0 l1 5 q-32 -8 -64 0 z" fill="#d62828"/>
+                </svg>
+            </div>
+            <div class="op-logo-main ps-logo">ONE PIECE</div>
+            <div class="op-logo-sub ps-sub">SURVIVOR</div>
+            <div class="ps-banner"><span id="press-start-txt">HAZ CLIC PARA ZARPAR</span></div>
+            <div class="ps-hint">¡El Grand Line te espera, pirata!</div>
+        </div>
+        <div class="ps-waves" aria-hidden="true"></div>
+    </div>
+
+    <!-- Shop Screen -->
+    <div id="shop-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board shop-board">
+            <div class="shop-head">
+                <div class="wanted-title">TIENDA</div>
+                <div class="shop-wallet" aria-live="polite"><span class="shop-coin">฿</span><span id="shop-beli">0</span></div>
+            </div>
+            <div class="shop-scroll">
+                <div class="wanted-subtitle">MEJORAS PERMANENTES · <span id="shop-unlocked"></span></div>
+                <div class="upgrade-list" id="shop-options"></div>
+                <button class="btn-start" style="margin-top:12px; background: linear-gradient(135deg, #f43f5e, #be123c);" onclick="resetMeta()">RESETEAR MEJORAS</button>
+            </div>
+            <button class="btn-start shop-back" onclick="closeShop()">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- Upgrade Screen -->
+    <div id="upgrade-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board">
+            <div class="wanted-title">WANTED</div>
+            <div class="wanted-subtitle" id="upgrade-subtitle">¡SUBIDA DE NIVEL! ELIGE TU MEJORA — DEAD OR ALIVE</div>
+            <div class="upgrade-list" id="upgrade-options"></div>
+            <div class="upgrade-toolbar" id="upgrade-toolbar"></div>
+        </div>
+    </div>
+
+    <!-- Voluntades de D (Arcanas) -->
+    <div id="arcana-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board">
+            <div class="wanted-title">VOLUNTADES DE D</div>
+            <div class="wanted-subtitle" id="arcana-subtitle">ELIGE UNA VOLUNTAD — SOLO UN DESTINO</div>
+            <div class="upgrade-list" id="arcana-options"></div>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="overlay-screen" style="display: none;">
+        <h1 style="font-size: 52px; color: #facc15; text-shadow: 0 4px 20px rgba(250,204,21,0.5);">¡VICTORIA PIRATA!</h1>
+        <div id="victory-stats" style="color: #cbd5e1; font-size: 15px; margin-bottom: 8px; font-family:'Segoe UI',sans-serif;"></div>
+        <div id="victory-summary" style="margin-bottom: 12px;"></div>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 25px; font-family:'Segoe UI',sans-serif;">El mar sigue traicionero... ¿seguís navegando?</p>
+        <button class="btn-start" onclick="startEndless()">☠ MODO INFINITO — SEGUIR NAVEGANDO</button>
+        <button class="btn-start" style="margin-top: 10px;" onclick="restartGame()">VOLVER A JUGAR</button>
+        <button class="btn-start" style="background: linear-gradient(135deg, #94a3b8, #475569); margin-top: 8px;" onclick="backToMenu()">VOLVER AL MENÚ</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="overlay-screen" style="display: none;">
+        <h1 style="font-size: 48px; color: #f43f5e; text-shadow: 0 4px 20px rgba(244,63,94,0.5);">DERROTADO</h1>
+        <div id="gameover-stats" style="color: #cbd5e1; font-size: 15px; margin-bottom: 8px; font-family:'Segoe UI',sans-serif;"></div>
+        <div id="gameover-summary" style="margin-bottom: 20px;"></div>
+        <button class="btn-start" onclick="restartGame()">REINTENTAR</button>
+        <button class="btn-start" style="background: linear-gradient(135deg, #94a3b8, #475569); margin-top: 8px;" onclick="backToMenu()">VOLVER AL MENÚ</button>
+    </div>
+
+    <!-- Logros: cartel agrupado por lo que desbloquea cada uno (js/collection.js) -->
+    <div id="achievements-screen" class="overlay-screen cl-screen" style="display: none;">
+        <div class="wanted-board op-board cl-board">
+            <div class="op-head">
+                <div class="wanted-title op-title">LOGROS</div>
+                <div class="pz-chips" id="ach-chips"></div>
+                <div class="cl-tabs" role="tablist" id="ach-tabs"></div>
+            </div>
+            <div class="op-scroll" id="ach-list"></div>
+            <button class="btn-start op-foot" onclick="closeAchievements()">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- Récords -->
+    <div id="records-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board" style="max-width: 94vw; max-height: 86vh; overflow-y: auto;">
+            <div class="wanted-title">RÉCORDS</div>
+            <div class="wanted-subtitle">LA MEJOR SINGLADURA DE CADA PIRATA EN CADA ISLA</div>
+            <div id="records-table"></div>
+            <button class="btn-start" style="margin-top:12px;" onclick="closeRecords()">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- Colección: enemigos por isla, arsenal y recetas de evolución (js/collection.js) -->
+    <div id="collection-screen" class="overlay-screen cl-screen" style="display: none;">
+        <div class="wanted-board op-board cl-board">
+            <div class="op-head">
+                <div class="wanted-title op-title">COLECCIÓN</div>
+                <div class="cl-tabs" role="tablist" id="coll-tabs"></div>
+            </div>
+            <div class="op-scroll" id="coll-body"></div>
+            <div class="cl-detail" id="coll-detail" aria-live="polite"></div>
+            <button class="btn-start op-foot" onclick="closeCollection()">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- Partida guardada: exportar e importar (js/savefile.js) -->
+    <div id="save-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board op-board save-board">
+            <div class="op-head">
+                <div class="wanted-title op-title">BITÁCORA</div>
+                <div class="wanted-subtitle">LLEVA TU PARTIDA A OTRO DISPOSITIVO</div>
+            </div>
+            <div class="op-scroll">
+                <p class="save-current" id="save-current"></p>
+                <div class="op-section"><span>NUBE</span></div>
+                <div id="cloud-box" class="cloud-box"></div>
+                <div class="op-section"><span>EXPORTAR</span></div>
+                <div class="save-row">
+                    <button class="op-btn" onclick="saveDownload()"><span class="op-ic" data-ico="up"></span><span>Descargar archivo</span></button>
+                    <button class="op-btn" onclick="saveCopy()"><span class="op-ic" data-ico="drop"></span><span>Copiar código</span></button>
+                </div>
+                <div class="op-section"><span>IMPORTAR</span></div>
+                <div class="save-row">
+                    <label class="op-btn"><span class="op-ic" data-ico="ship"></span><span>Cargar archivo</span><input type="file" accept=".json,application/json,text/plain" onchange="saveImportFile(this)" hidden></label>
+                    <button class="op-btn" onclick="saveImportCode()"><span class="op-ic" data-ico="play"></span><span>Importar código</span></button>
+                </div>
+                <textarea id="save-code" class="save-code" spellcheck="false" aria-label="Código de la partida" placeholder="Pega aquí el código de una partida"></textarea>
+                <p class="save-msg" id="save-msg" aria-live="polite"></p>
+            </div>
+            <button class="btn-start op-foot" onclick="closeSavePanel()">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- Options Screen: mismo cartel que la pausa, con secciones y controles propios -->
+    <div id="options-screen" class="overlay-screen" style="display: none;">
+        <div class="wanted-board op-board opt-board">
+            <div class="op-head">
+                <div class="wanted-title op-title">OPCIONES</div>
+                <div class="wanted-subtitle">AJUSTES DE NAVEGACIÓN</div>
+            </div>
+            <div class="op-scroll opt-body">
+                <div class="opt-col">
+                    <div class="op-section"><span>SONIDO</span></div>
+                    <div class="op-row op-slider"><span class="op-ic" data-ico="gauge"></span><label for="opt-master">General</label>
+                        <input type="range" id="opt-master" min="0" max="100" value="80" oninput="setVolMaster(this.value)"><b class="op-val" id="opt-master-val">80</b></div>
+                    <div class="op-row op-slider"><span class="op-ic" data-ico="sound"></span><label for="opt-music">Música</label>
+                        <input type="range" id="opt-music" min="0" max="100" value="80" oninput="setVolMusic(this.value)"><b class="op-val" id="opt-music-val">80</b></div>
+                    <div class="op-row op-slider"><span class="op-ic" data-ico="crit"></span><label for="opt-sfx">Efectos</label>
+                        <input type="range" id="opt-sfx" min="0" max="100" value="80" oninput="setVolSfx(this.value)" onchange="playSound('ui')"><b class="op-val" id="opt-sfx-val">80</b></div>
+                    <div class="op-section"><span>PARTIDA</span></div>
+                    <label class="op-row op-toggle"><span class="op-ic" data-ico="pauseIco"></span><span class="op-lbl">Auto-pausa al cambiar de pestaña</span><input type="checkbox" id="opt-autopause" checked><i></i></label>
+                    <label class="op-row op-toggle"><span class="op-ic" data-ico="power"></span><span class="op-lbl">Números de daño</span><input type="checkbox" id="opt-dmgnums" checked><i></i></label>
+                    <button class="op-btn" onclick="showSavePanel()"><span class="op-ic" data-ico="ship"></span><span>Partida y sincronización</span></button>
+                </div>
+                <div class="opt-col">
+                    <div class="op-section"><span>GRÁFICOS</span></div>
+                    <div class="op-row op-select"><span class="op-ic" data-ico="full"></span><label for="opt-quality" class="op-lbl">Calidad</label>
+                        <select id="opt-quality">
+                            <option value="auto">Automática</option>
+                            <option value="high">Alta</option>
+                            <option value="medium">Media</option>
+                            <option value="low">Baja (móviles lentos)</option>
+                        </select></div>
+                    <label class="op-row op-toggle"><span class="op-ic" data-ico="area"></span><span class="op-lbl">Sacudida de cámara</span><input type="checkbox" id="opt-shake" checked><i></i></label>
+                    <label class="op-row op-toggle"><span class="op-ic" data-ico="fastforward"></span><span class="op-lbl">Partículas reducidas <small>dispositivos lentos</small></span><input type="checkbox" id="opt-particles"><i></i></label>
+                    <label class="op-row op-toggle"><span class="op-ic" data-ico="dodge"></span><span class="op-lbl">Menos destellos <small>fotosensibilidad</small></span><input type="checkbox" id="opt-flashes"><i></i></label>
+                    <div class="op-section opt-account"><span>CUENTA</span></div>
+                    <div id="google-slot" class="g-slot" aria-live="polite"></div>
+                </div>
+            </div>
+            <button class="btn-start op-foot" onclick="closeOptions()">VOLVER</button>
+        </div>
+    </div>
+</div>
+
+<script src="local.js"></script>
+<script src="js/atlas-index.js"></script>
+<script src="js/core.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/state.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/systems.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/arsenal.js"></script>
+<script src="js/waves.js"></script>
+<script src="js/loot.js"></script>
+<script src="js/modes.js"></script>
+<script src="js/vfx.js"></script>
+<script src="js/render.js"></script>
+<script src="js/gears.js"></script>
+<script src="js/crew.js"></script>
+<script src="js/crewfx.js"></script>
+<script src="js/crewfx2.js"></script>
+<script src="js/arsenalfx.js"></script>
+<script src="js/pixicons.js"></script>
+<script src="js/collection.js"></script>
+<script src="js/savefile.js"></script>
+<script src="js/cloudsync.js"></script>
+<script src="js/main.js"></script>
+<button id="gear-btn" onclick="gearActivate()" aria-label="Activar Gear">G2</button>
+<div id="ach-toast"></div>
+</body>
+</html>

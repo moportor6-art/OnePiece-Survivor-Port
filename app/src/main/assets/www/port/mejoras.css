@@ -43,7 +43,7 @@ body.op-sin-mini #op-mini{display:none!important}
 /* ─── Segunda tanda (port/extras.js) ─── */
 #op-auto { position: fixed; z-index: 30; right: 10px; top: 118px; padding: 5px 10px; border-radius: 9px;
   font: 800 12px/1 inherit; letter-spacing: .5px; color: #f5e6c8; background: rgba(36,21,8,.78);
-  border: 2px solid #8a6a3a; box-shadow: 0 2px 6px rgba(0,0,0,.4); cursor: pointer; touch-action: manipulation; }
+  border: 2px solid #8a6a3a; box-shadow: 0 2px 6px rgba(0,0,0,.4); cursor: pointer; touch-action: manipulation; pointer-events: auto; }
 #op-auto.on { color: #142b05; background: #a6e35a; border-color: #4d7a16; }
 #op-auto-av { position: fixed; z-index: 29; left: 50%; top: 86px; transform: translateX(-50%); pointer-events: none;
   padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 13px; color: #fff7d6; background: rgba(36,21,8,.72);

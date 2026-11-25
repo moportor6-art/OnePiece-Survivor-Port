@@ -91,6 +91,15 @@ const fail = [];
     return out;
   });
   if (tapa.length) fail.push('algo opaco tapa el juego: ' + tapa.join(', '));
+  // el botón AUTO responde a un toque de verdad (en la 0.3 el HUD del juego tenía pointer-events:none y no hacía nada)
+  if (await estado() === 'PLAYING') {
+    const pos = await page.evaluate(() => { const b = document.getElementById('op-auto'); if (!b) return null; const r = b.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2, OPPort.o.auto]; });
+    if (pos) {
+      await page.touchscreen.tap(pos[0], pos[1]); await sleep(300);
+      if (await page.evaluate(() => OPPort.o.auto) === pos[2]) fail.push('el botón AUTO no responde al tocarlo');
+      await page.touchscreen.tap(pos[0], pos[1]); await sleep(300);
+    }
+  }
   const st = await estado();
   if (!['PLAYING', 'LEVELUP', 'PAUSED', 'GAMEOVER', 'CHEST'].includes(st) && !/UP/.test(st)) fail.push('la partida no está en juego (estado ' + st + ')');
   if (await elegir() === '' && st === 'PLAYING') {

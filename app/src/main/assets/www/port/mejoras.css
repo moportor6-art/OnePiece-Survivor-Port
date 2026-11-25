@@ -52,7 +52,7 @@ body.op-sin-mini #op-mini{display:none!important}
   color: #b8ff8a; text-shadow: 0 0 3px #000, 0 0 2px #000; }
 body.op-sin-fps #op-fps, body.op-sin-dps .op-dps { display: none; }
 .op-dps b { color: #ffd65a; }
-#op-flechas { position: fixed; inset: 0; z-index: 8; pointer-events: none; }
+#op-flechas { position: fixed; inset: 0; z-index: 8; pointer-events: none; background: transparent !important; }
 #op-entreno { position: fixed; z-index: 30; left: 50%; bottom: 10px; transform: translateX(-50%); display: none; gap: 6px;
   align-items: center; padding: 6px 8px; border-radius: 10px; background: rgba(36,21,8,.85); border: 2px solid #8a6a3a; color: #f5e6c8; }
 #op-entreno b { font-size: 12px; margin-right: 4px; }

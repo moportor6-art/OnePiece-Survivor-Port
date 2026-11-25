@@ -77,6 +77,20 @@ const fail = [];
     await page.keyboard.down(k); await sleep(900); await page.keyboard.up(k);
   }
   await shot('3-partida');
+  // nada opaco puede tapar el juego (en la 0.3 un canvas del port heredó el fondo oscuro y dejó la pantalla negra)
+  const tapa = await page.evaluate(() => {
+    const cv = document.getElementById('gameCanvas'), out = [];
+    for (const el of document.body.querySelectorAll('*')) {
+      if (el === cv || el.contains(cv) || el.closest('.overlay-screen')) continue;
+      const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+      if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity < 0.5) continue;
+      if (r.width * r.height < innerWidth * innerHeight * 0.5) continue;
+      const m = cs.backgroundColor.match(/rgba?\(([^)]+)\)/), p = m ? m[1].split(',') : [];
+      if (p.length && (p[3] === undefined || parseFloat(p[3]) > 0.9)) out.push((el.id || el.tagName) + ' ' + cs.backgroundColor);
+    }
+    return out;
+  });
+  if (tapa.length) fail.push('algo opaco tapa el juego: ' + tapa.join(', '));
   const st = await estado();
   if (!['PLAYING', 'LEVELUP', 'PAUSED', 'GAMEOVER', 'CHEST'].includes(st) && !/UP/.test(st)) fail.push('la partida no está en juego (estado ' + st + ')');
   if (await elegir() === '' && st === 'PLAYING') {

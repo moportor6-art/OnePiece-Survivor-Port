@@ -49,6 +49,8 @@ cofres y logros.
   - **0.4:** Bodega ampliada (+2 huecos de pasiva, 6 → 8), Cañón extra (+1 hueco de técnica, 6 → 7), Veterano (empiezas
     hasta 3 niveles más arriba), Haki de armadura (escudo que bloquea un golpe y se recarga), Botín de guerra (curar al
     derrotar), Cofre del tesoro (cofres con más objetos) y Sello de la tripulación (+daño por cada técnica distinta).
+  - **Sprites de los Gears** (`www/port/sprites`, de hojas que pasó el usuario): Gear 3 con su propio sprite de brazo
+    inflado, Luffy encogido con 4 cuadros de reposo y 4 de correr, y Gear 5 con 6 cuadros de reposo y 6 de ataque.
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
   de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 

@@ -337,6 +337,35 @@
     };
   });
 
+  // ─── Sprites nuevos de los Gears de Luffy (hojas que pasó el usuario; port/sprites) ───
+  //   Gear 3: sprite propio con el brazo inflado (reposo, caminar y ataque) · Luffy encogido: 4 cuadros de reposo y 4 de correr
+  //   Gear 5: 6 cuadros de reposo (antes 3) y 6 de ataque (antes 3); el caminar ya era de la misma hoja.
+  //   Cada cuadro se dibuja a la escala de su hoja (k), así no cambia de tamaño entre animaciones.
+  bloque('sprites de gears', function () {
+    if (typeof GEAR_SPR === 'undefined' || typeof gearSpriteFrame !== 'function') return;
+    function L(n, c) { var a = []; for (var i = 0; i < c; i++) { var im = new Image(); im.src = 'port/sprites/' + n + '_' + i + '.png'; a.push(im); } return a; }
+    var NUEVO = {
+      3: { idle: L('g3_idle', 6), walk: L('g3_idle', 6), attack: L('g3_attack', 4), k: 0.96, fps: 7 },
+      5: { idle: L('g5_idle', 6), walk: GEAR_SPR[5].walk, attack: L('g5_attack', 6), k: 0.905, fps: 8 },
+      chibi: { idle: L('chibi_idle', 4), walk: L('chibi_walk', 4), attack: L('chibi_idle', 4), k: 0.62, fps: 7 }
+    };
+    var viejo = gearSpriteFrame;
+    gearSpriteFrame = function () {   // eslint-disable-line no-global-assign
+      try {
+        if (gearIsLuffy()) {
+          var set = gearState.active === 3 || gearState.active === 5 ? NUEVO[gearState.active]
+            : (gearState.active < 2 && gearState.penalty === 'chibi' ? NUEVO.chibi : null);
+          if (set) {
+            var st = player.animState === 'attack' ? 'attack' : (player.animState === 'walk' ? 'walk' : 'idle');
+            var arr = set[st], img = arr[Math.floor(performance.now() / 1000 * set.fps) % arr.length];
+            if (img && img.complete && img.naturalWidth) return { img: img, h: img.naturalHeight * (set.k || 1) };
+          }
+        }
+      } catch (e) { /* si algo falla, el del juego */ }
+      return viejo.apply(this, arguments);
+    };
+  });
+
   // ─── Pantallas propias (mismo cartel que las del juego) ───
   function pantalla(id, titulo, sub, html, alCerrar) {
     var s = $(id);

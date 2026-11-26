@@ -573,7 +573,7 @@
       }
     }
     function entrar() {
-      activo = true;
+      activo = true; forma = 0;
       OP.guardarSel();
       selectedMap = 'shelltown';
       startGame();
@@ -583,12 +583,14 @@
       }, 300);
       if (!panel) {
         panel = document.createElement('div'); panel.id = 'op-entreno';
-        panel.innerHTML = '<b>ENTRENAMIENTO</b><button data-e="nivel">+1 nivel</button><button data-e="reset">Reiniciar daño</button><button data-e="salir">Salir</button>';
+        panel.innerHTML = '<b>ENTRENAMIENTO</b><button data-e="nivel">+1 nivel</button><button data-e="forma">Forma: máx.</button>'
+          + '<button data-e="reset">Reiniciar daño</button><button data-e="salir">Salir</button>';
         panel.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
         panel.addEventListener('click', function (e) {
           var k = e.target.dataset && e.target.dataset.e; if (!k) return;
           if (k === 'nivel' && jugando()) { player.level++; levelUp(); }
           if (k === 'reset') { OP.run.dano = {}; OP.run.crits = 0; OP.run.golpes = 0; }
+          if (k === 'forma') cambiarForma(e.target);
           if (k === 'salir') { salir(); backToMenu(); }
         });
         document.body.appendChild(panel);
@@ -597,6 +599,25 @@
     }
     function salir() { activo = false; if (panel) panel.style.display = 'none'; }
     OP.entrenar = entrar;
+    // Formas: en el entrenamiento se pueden probar todas (G2…G5) sin evolución, logro ni minuto 6
+    var forma = 0;   // 0 = la más alta
+    function maxForma() { var c = typeof gearChar === 'function' && gearChar(); return c && FORMS[c] ? Math.max.apply(null, Object.keys(FORMS[c]).map(Number)) : 0; }
+    function cambiarForma(btn) {
+      var m = maxForma(); if (!m) return;
+      forma = forma === 0 ? 2 : (forma >= m ? 0 : forma + 1);
+      var c = gearChar(), nombre = forma ? (FORMS[c][forma] && FORMS[c][forma].short) || ('G' + forma) : 'máx.';
+      btn.textContent = 'Forma: ' + nombre;
+      if (gearCardLevel() <= 0) toast('Primero coge la carta de transformación al subir de nivel');
+      else { gearState.meter = 100; gearState.penalty = null; gearState.g5cd = 0; if (typeof gearUpdateButton === 'function') gearUpdateButton(); }
+    }
+    if (typeof gearAvailable === 'function') {
+      var ga = gearAvailable;
+      gearAvailable = function () {   // eslint-disable-line no-global-assign
+        if (!activo) return ga.apply(this, arguments);
+        if (gearCardLevel() <= 0) return 0;
+        var m = maxForma(); return forma ? Math.min(forma, m) : m;
+      };
+    }
     var up = update;
     update = function (dt) {   // eslint-disable-line no-global-assign
       var r = up.apply(this, arguments);

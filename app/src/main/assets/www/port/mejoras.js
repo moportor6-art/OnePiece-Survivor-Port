@@ -104,6 +104,10 @@
     calculateDamage = function () {   // eslint-disable-line no-global-assign
       var r = cd.apply(this, arguments);
       if (r.isCrit && player.critDmgBonus) r.amount = Math.round(r.amount * (2 + player.critDmgBonus) / 2);   // Golpe crítico (tienda)
+      if (player.opSello) {   // Sello de la tripulación (tienda): +x% por cada técnica distinta
+        var nt = 0; for (var k in skills) if (skills[k].level > 0 && !(player.passives && k in player.passives)) nt++;
+        r.amount = Math.round(r.amount * (1 + player.opSello * nt));
+      }
       var R = OP.run;
       R.golpes++;
       if (r.isCrit) R.crits++;

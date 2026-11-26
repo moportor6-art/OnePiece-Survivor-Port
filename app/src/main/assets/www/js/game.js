@@ -1583,12 +1583,12 @@ function showUpgradeScreen(count, isChest) {
         }
         if (isNew && u.type === 'weapon') {
             const equippedWeapons = Object.keys(skills).filter(k => weaponIds.includes(k) && skills[k].level > 0).length;
-            if (equippedWeapons >= 6) return false;
+            if (equippedWeapons >= (window.OPSlotsTec || 6)) return false;
         }
         if (isNew && u.type === 'passive') {
             // VS: máximo 6 pasivas por partida
             const ownedPassives = passiveIds.filter(pid => (player.passives[pid] || 0) > 0).length;
-            if (ownedPassives >= 6) return false;
+            if (ownedPassives >= (window.OPSlotsPas || 6)) return false;
         }
         return true;
     });

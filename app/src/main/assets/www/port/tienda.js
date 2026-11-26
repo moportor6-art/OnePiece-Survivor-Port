@@ -31,6 +31,9 @@
           if (lvl > base) m[1](p, lvl - base);
         };
       });
+      // precios fijos por nivel para las mejoras que los traen (costs); el resto sigue la fórmula del juego
+      var mc = metaUpgradeCost;
+      metaUpgradeCost = function (u, lvl) { return u.costs ? u.costs[Math.min(lvl, u.costs.length - 1)] : mc(u, lvl); };   // eslint-disable-line no-global-assign
       var I = typeof ICONS !== 'undefined' ? ICONS : {};
       L.push(
         { id: 'op_regen', name: 'Recuperación', desc: '+0,15 HP por segundo por nivel', cost: 2500, max: 5, icon: I.meat || I.heart,
@@ -38,8 +41,26 @@
         { id: 'op_critdmg', name: 'Golpe crítico', desc: '+10% daño de los críticos por nivel', cost: 3500, max: 5, icon: I.crit,
           apply: function (p, lvl) { p.critDmgBonus = (p.critDmgBonus || 0) + lvl * 0.10; } },
         { id: 'op_suerte', name: 'Suerte', desc: '+5% suerte por nivel (cofres con más tesoros y más objetos)', cost: 3000, max: 5, icon: I.luck,
-          apply: function (p, lvl) { p.luckBonus += lvl * 0.05; } }
+          apply: function (p, lvl) { p.luckBonus += lvl * 0.05; } },
+        // 0.4: slots y cinco mejoras más
+        { id: 'op_slotpas', name: 'Bodega ampliada', desc: '+1 hueco de pasiva por nivel (6 → 8)', cost: 15000, costs: [15000, 40000], max: 2, icon: I.pickup,
+          apply: function () {} },
+        { id: 'op_slottec', name: 'Cañón extra', desc: '+1 hueco de técnica (6 → 7)', cost: 60000, costs: [60000], max: 1, icon: I.bazooka,
+          apply: function () {} },
+        { id: 'op_nivel', name: 'Veterano', desc: 'Empiezas la partida 1 nivel más arriba por nivel (con sus cartas)', cost: 4000, max: 3, icon: I.growth,
+          apply: function (p, lvl) { p.opNivelIni = lvl; } },
+        { id: 'op_haki', name: 'Haki de armadura', desc: 'Un escudo bloquea un golpe; se recarga en 20 s (−3 s por nivel)', cost: 6000, max: 3, icon: I.haki_buso,
+          apply: function (p, lvl) { p.opHaki = 23 - lvl * 3; } },
+        { id: 'op_botin', name: 'Botín de guerra', desc: '+1,5% de probabilidad por nivel de curar 2 HP al derrotar a un enemigo', cost: 3000, max: 5, icon: I.meat || I.heart,
+          apply: function (p, lvl) { p.opBotin = lvl * 0.015; } },
+        { id: 'op_cofre', name: 'Cofre del tesoro', desc: '+12% por nivel de que un cofre traiga más objetos (1 → 3 → 5)', cost: 5000, max: 3, icon: I.coin,
+          apply: function (p, lvl) { p.opCofre = lvl * 0.12; } },
+        { id: 'op_sello', name: 'Sello de la tripulación', desc: '+1% de daño por nivel por cada técnica distinta que lleves', cost: 4500, max: 5, icon: I.dice,
+          apply: function (p, lvl) { p.opSello = lvl * 0.01; } }
       );
+      // huecos según lo comprado (los lee el parche de game.js)
+      Object.defineProperty(window, 'OPSlotsPas', { configurable: true, get: function () { return 6 + ((typeof meta !== 'undefined' && meta.upgrades && meta.upgrades.op_slotpas) || 0); } });
+      Object.defineProperty(window, 'OPSlotsTec', { configurable: true, get: function () { return 6 + ((typeof meta !== 'undefined' && meta.upgrades && meta.upgrades.op_slottec) || 0); } });
     } catch (e) { console.warn('[port] tienda sin cambios:', e); }
   };
 })();

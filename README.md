@@ -46,6 +46,9 @@ cofres y logros.
   - **El botón MÚSICA del menú** calla toda la música, también la de batalla.
   - **Tienda de Berries** (`www/port/tienda.js`): las mejoras llegan a nivel 8 (Revivir a 2; en Velocidad y Área los
     niveles nuevos dan medio efecto) y hay tres nuevas: Recuperación, Golpe crítico y Suerte.
+  - **0.4:** Bodega ampliada (+2 huecos de pasiva, 6 → 8), Cañón extra (+1 hueco de técnica, 6 → 7), Veterano (empiezas
+    hasta 3 niveles más arriba), Haki de armadura (escudo que bloquea un golpe y se recarga), Botín de guerra (curar al
+    derrotar), Cofre del tesoro (cofres con más objetos) y Sello de la tripulación (+daño por cada técnica distinta).
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
   de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 

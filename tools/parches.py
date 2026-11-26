@@ -12,6 +12,8 @@ dependa de él se apaga sola: los mods de www/port/ comprueban que el gancho exi
 3. Tienda (state.js): antes de leer el guardado se llama a window.OPTienda (www/port/tienda.js), que sube los
    niveles máximos y añade mejoras. Si este parche no encaja, la tienda queda como la original (sin perder nada:
    el juego devuelve los Berries de los niveles que sobren).
+4. Slots (game.js): el tope de 6 técnicas y 6 pasivas pasa a window.OPSlotsTec / OPSlotsPas (tienda.js). Si no
+   encaja, queda en 6.
 """
 import os, sys
 
@@ -46,6 +48,13 @@ parche('js/game.js', 'gancho de ataque',
 parche('js/state.js', 'gancho de la tienda',
        "META_UPGRADES.forEach(u => meta.upgrades[u.id] = 0);",
        "if (window.OPTienda) window.OPTienda(META_UPGRADES);\nMETA_UPGRADES.forEach(u => meta.upgrades[u.id] = 0);")
+
+parche('js/game.js', 'slots de técnicas comprables',
+       "if (equippedWeapons >= 6) return false;",
+       "if (equippedWeapons >= (window.OPSlotsTec || 6)) return false;")
+parche('js/game.js', 'slots de pasivas comprables',
+       "if (ownedPassives >= 6) return false;",
+       "if (ownedPassives >= (window.OPSlotsPas || 6)) return false;")
 
 print(f'parches puestos: {hechos}')
 for a in avisos:

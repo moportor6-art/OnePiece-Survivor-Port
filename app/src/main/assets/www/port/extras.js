@@ -247,6 +247,7 @@
       selectedMap = S.map; selectedCharacter = S.char; runCurseRank = S.curse;
       try { runMode = S.mode; } catch (e) { /* nada */ }
       startGame();
+      if (OP.sinNivelIni) OP.sinNivelIni();
       var arc = $('arcana-screen'); if (arc) arc.style.display = 'none';
       for (var k in player) if (!(k in S.player)) delete player[k];
       Object.assign(player, S.player);
@@ -285,6 +286,55 @@
       if (S) bc.innerHTML = '<span class="op-slot">▶</span> CONTINUAR · ' + esc(CHAR_N[S.char] || S.char) + ' ' + formatTime(S.t);
     }
     pintar();
+  });
+
+  // ─── Mejoras de la tienda del port (port/tienda.js): Veterano, Haki de armadura, Botín de guerra, Cofre del tesoro ───
+  bloque('mejoras de tienda', function () {
+    var pend = 0;
+    var sg = startGame;
+    startGame = function () { var r = sg.apply(this, arguments); pend = player.opNivelIni || 0; return r; };   // eslint-disable-line no-global-assign
+    OP.sinNivelIni = function () { pend = 0; };
+    setInterval(function () {
+      if (pend > 0 && jugando()) { var n = pend; pend = 0; for (var i = 0; i < n; i++) { player.xp = player.nextXp; levelUp(); } }
+    }, 150);
+    // Haki de armadura: bloquea el primer golpe y da medio segundo sin daño; se recarga
+    var listo = 0, hasta = -1;
+    function bloquea(hp0) {
+      player.hp = hp0;
+      if (gameTime >= hasta) {
+        hasta = gameTime + 0.5; listo = gameTime + player.opHaki;
+        spawnDamageText(player.x, player.y - 34, { amount: '¡HAKI!', isCrit: false });
+        if (typeof fxRing === 'function') fxRing(player.x, player.y, '#a78bfa', 26, 0.35);
+      }
+    }
+    var up = update, hp0 = 0;
+    update = function () {   // eslint-disable-line no-global-assign
+      hp0 = player ? player.hp : 0;
+      var r = up.apply(this, arguments);
+      if (player && player.opHaki && estado() === 'PLAYING' && player.hp < hp0 && player.hitTimer >= 0.1
+        && (gameTime < hasta || gameTime >= listo)) bloquea(hp0);
+      return r;
+    };
+    var go = triggerGameOver;
+    triggerGameOver = function () {   // eslint-disable-line no-global-assign
+      if (player && player.opHaki && (gameTime < hasta || gameTime >= listo) && hp0 > 0) { bloquea(hp0); updateUI(); return; }
+      return go.apply(this, arguments);
+    };
+    OP.hakiListo = function () { return player && player.opHaki ? Math.max(0, listo - gameTime) : -1; };
+    // Botín de guerra
+    var ke = killEnemy;
+    killEnemy = function () {   // eslint-disable-line no-global-assign
+      var r = ke.apply(this, arguments);
+      if (player && player.opBotin && Math.random() < player.opBotin && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + 2);
+      return r;
+    };
+    // Cofre del tesoro
+    var cc = chestItemCount;
+    chestItemCount = function () {   // eslint-disable-line no-global-assign
+      var n = cc.apply(this, arguments);
+      if (player && player.opCofre && n < 5 && Math.random() < player.opCofre) n = n === 1 ? 3 : 5;
+      return n;
+    };
   });
 
   // ─── Pantallas propias (mismo cartel que las del juego) ───

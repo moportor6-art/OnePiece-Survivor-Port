@@ -349,9 +349,35 @@
       5: { idle: L('g5_idle', 6), walk: GEAR_SPR[5].walk, attack: L('g5_attack', 6), k: 0.905, fps: 8 },
       chibi: { idle: L('chibi_idle', 4), walk: L('chibi_walk', 4), attack: L('chibi_idle', 4), k: 0.62, fps: 7 }
     };
+    // Tripulación (hojas de Gigant Battle que pasó el usuario): [cuadros de reposo, caminar, ataque, escala]
+    //   Zoro 3 Asura y 4 Rey del Infierno · Nami 4 · Brook 2 Soul King y 3 alma · Robin 4 · Usopp 4 God Usopp ·
+    //   Franky 3 y 4 (el juego lo agranda en Shogun) · Chopper 3 y 4 Monster Point (Heavy Point agrandado) · Sanji 4 Ifrit Jambe
+    var CREW = {"zoro": {"3": [5, 0, 4, 0.63], "4": [4, 8, 4, 1.429]}, "nami": {"4": [3, 8, 4, 0.685]}, "brook": {"2": [4, 8, 4, 0.703], "3": [4, 0, 4, 0.64]}, "robin": {"4": [4, 8, 4, 0.714]}, "usopp": {"4": [4, 7, 5, 0.82]}, "franky": {"3": [4, 8, 5, 0.756]}, "chopper": {"3": [3, 4, 5, 0.926]}, "sanji": {"4": [4, 8, 6, 0.725]}};
+    var USA = { franky: { 4: 3 }, chopper: { 4: 3 } };   // formas que reutilizan la hoja de otra
+    var CS = {};
+    function crewSet(c, f) {
+      var g = (USA[c] && USA[c][f]) || f, d = CREW[c] && CREW[c][g];
+      if (!d) return null;
+      var key = c + g;
+      if (!CS[key]) {
+        var idle = L(key + '_idle', d[0]);
+        CS[key] = { idle: idle, walk: d[1] ? L(key + '_walk', d[1]) : idle, attack: L(key + '_attack', d[2]), k: d[3], fps: 7 };
+      }
+      return CS[key];
+    }
+    for (var pc in CREW) for (var pf in CREW[pc]) crewSet(pc, +pf);   // se cargan al abrir el juego (son locales y pequeños)
     var viejo = gearSpriteFrame;
     gearSpriteFrame = function () {   // eslint-disable-line no-global-assign
       try {
+        var cc = typeof gearChar === 'function' && gearChar();
+        if (cc && cc !== 'luffy' && gearState.active >= 2) {
+          var cs = crewSet(cc, gearState.active);
+          if (cs) {
+            var st2 = player.animState === 'attack' ? 'attack' : (player.animState === 'walk' ? 'walk' : 'idle');
+            var ar = cs[st2], im2 = ar[Math.floor(performance.now() / 1000 * cs.fps) % ar.length];
+            if (im2 && im2.complete && im2.naturalWidth) return { img: im2, h: im2.naturalHeight * cs.k };
+          }
+        }
         if (gearIsLuffy()) {
           var set = gearState.active === 3 || gearState.active === 5 ? NUEVO[gearState.active]
             : (gearState.active < 2 && gearState.penalty === 'chibi' ? NUEVO.chibi : null);

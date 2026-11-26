@@ -51,6 +51,9 @@ cofres y logros.
     derrotar), Cofre del tesoro (cofres con más objetos) y Sello de la tripulación (+daño por cada técnica distinta).
   - **Sprites de los Gears** (`www/port/sprites`, de hojas que pasó el usuario): Gear 3 con su propio sprite de brazo
     inflado, Luffy encogido con 4 cuadros de reposo y 4 de correr, y Gear 5 con 6 cuadros de reposo y 6 de ataque.
+    Tripulación (hojas de *One Piece: Gigant Battle!* 1 y 2, ripeadas por Heatpark, Maverick-PK y otros de
+    spritedatabase.net): Zoro Asura y Rey del Infierno, Nami Zeus Breeze, Brook Soul King y alma fuera del cuerpo, Robin
+    Demonio Fleur, God Usopp, General Franky y Franky Shogun, Chopper Monster Point (Heavy Point) y Sanji Ifrit Jambe.
   - **CARGAR** (botón junto al de Gear, o mantener C): llena el medidor de transformación de cualquier personaje con un
     aura humeante de su color; mientras cargas te quedas quieto y recibes un 30 % más de daño. Estallido de humo al llenarse.
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor

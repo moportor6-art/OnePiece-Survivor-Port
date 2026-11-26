@@ -51,6 +51,8 @@ cofres y logros.
     derrotar), Cofre del tesoro (cofres con más objetos) y Sello de la tripulación (+daño por cada técnica distinta).
   - **Sprites de los Gears** (`www/port/sprites`, de hojas que pasó el usuario): Gear 3 con su propio sprite de brazo
     inflado, Luffy encogido con 4 cuadros de reposo y 4 de correr, y Gear 5 con 6 cuadros de reposo y 6 de ataque.
+  - **CARGAR** (botón junto al de Gear, o mantener C): llena el medidor de transformación de cualquier personaje con un
+    aura humeante de su color; mientras cargas te quedas quieto y recibes un 30 % más de daño. Estallido de humo al llenarse.
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
   de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 

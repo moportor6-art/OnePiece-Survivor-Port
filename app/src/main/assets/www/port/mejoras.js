@@ -9,7 +9,7 @@
   'use strict';
   var KEY = 'op_port_opts';
   var DEF = { critRojo: true, critCont: true, critMarca: true, fps: 0, joy: 'flotante', joyTam: 'normal', joyZona: 10,
-    vibra: true, mini: true, auto: false, saltar: false, fpsCont: true, dps: true, flechas: true, musBat: 'battle', musMenu: 'menu' };
+    vibra: true, mini: true, carga: true, auto: false, saltar: false, fpsCont: true, dps: true, flechas: true, musBat: 'battle', musMenu: 'menu' };
   var O = {};
   try { O = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) { O = Object.assign({}, DEF); }
   function guardar() { try { localStorage.setItem(KEY, JSON.stringify(O)); } catch (e) { /* nada */ } aplicar(); }
@@ -58,6 +58,7 @@
     ['tog', 'vibra', 'Vibración', 'golpes, nivel y jefes', 'sound'],
     ['tog', 'mini', 'Minimapa', 'cofres y jefes', 'ship'],
     ['tog', 'flechas', 'Flechas al jefe y los cofres', 'en el borde de la pantalla', 'ship'],
+    ['tog', 'carga', 'Botón CARGAR', 'mantenlo para llenar el medidor de transformación (quieto y recibes más daño)', 'gauge'],
     ['tog', 'auto', 'Auto-aprender', 'elige las mejoras sin pausar (botón AUTO en partida)', 'up'],
     ['tog', 'saltar', 'Saltar animaciones', 'ruleta de cofres y evoluciones', 'fastforward'],
     ['tog', 'dps', 'Daño por segundo en vivo', '', 'power'],
@@ -313,7 +314,7 @@
     var HKEY = 'op_port_hud';
     var PIEZAS = [['.hud-top .player-status', 'Cartel de vida'], ['#time-top', 'Tiempo'], ['#pause-btn', 'Pausa'],
       ['#gear-btn', 'Botón de Gear'], ['#weapons-hud', 'Técnicas'], ['#op-crit', 'Críticos'], ['#op-mini', 'Minimapa'],
-      ['#op-auto', 'Botón AUTO'], ['#op-fps', 'FPS']];
+      ['#op-auto', 'Botón AUTO'], ['#op-fps', 'FPS'], ['#op-carga', 'Botón CARGAR']];
     var H = {};
     try { H = JSON.parse(localStorage.getItem(HKEY)) || {}; } catch (e) { H = {}; }
     OP.aplicarHud = function () {

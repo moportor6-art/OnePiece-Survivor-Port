@@ -366,6 +366,105 @@
     };
   });
 
+  // ─── CARGAR: mantener el botón llena el medidor de transformación con un aura humeante ───
+  //   Vale para toda la tripulación (GEAR, HAKI, RAID SUIT, CLIMA, SNIPER, RUMBLE, HANA, COLA, ALMA, MAREA).
+  //   Mientras cargas te quedas quieto y recibes un 30% más de daño. Tecla: C (mantener).
+  bloque('cargar', function () {
+    if (typeof gearChar !== 'function') return;
+    var VEL = 12;   // % por segundo (de 0 a 100 en unos 8 s), más con la mejora de carga
+    var COL = { luffy: '#f9a8d4', zoro: '#cbd5e1', sanji: '#93c5fd', nami: '#7dd3fc', usopp: '#fde68a', chopper: '#fda4af',
+      robin: '#c4b5fd', franky: '#67e8f9', brook: '#e9d5ff', jinbe: '#5eead4' };
+    var tecla = false, dedo = false, lleno = false, humo = [];
+    function puede() {
+      return O.carga && jugando() && gearChar() && gearCardLevel() > 0 && !gearState.active && gearState.penalty !== 'exhausted';
+    }
+    function cargando() { return (tecla || dedo) && puede() && gearState.meter < 100; }
+    OP.cargando = cargando;
+    var b = document.createElement('button');
+    b.id = 'op-carga'; b.type = 'button'; b.innerHTML = '<span>CARGAR</span>';
+    function on(e) { e.preventDefault(); e.stopPropagation(); dedo = true; }
+    function off(e) { if (e) e.stopPropagation(); dedo = false; }
+    b.addEventListener('touchstart', on, { passive: false });
+    b.addEventListener('touchend', off); b.addEventListener('touchcancel', off);
+    b.addEventListener('mousedown', on); window.addEventListener('mouseup', function () { dedo = false; });
+    ($('ui-layer') || document.body).appendChild(b);
+    window.addEventListener('keydown', function (e) { if ((e.key === 'c' || e.key === 'C') && !e.repeat) tecla = true; });
+    window.addEventListener('keyup', function (e) { if (e.key === 'c' || e.key === 'C') tecla = false; });
+    window.addEventListener('blur', function () { tecla = dedo = false; });
+    setInterval(function () {
+      var ver = O.carga && jugando() && gearChar() && gearCardLevel() > 0;
+      b.style.display = ver ? '' : 'none';
+      b.classList.toggle('op-off', !!ver && !puede());
+      b.classList.toggle('op-lleno', !!ver && gearState.meter >= 100);
+      b.classList.toggle('on', cargando());
+      if (!ver) dedo = false;
+    }, 120);
+    // efecto en la partida: quieto, medidor más rápido y más daño recibido
+    var up = update;
+    update = function (dt) {   // eslint-disable-line no-global-assign
+      var c = cargando(), x = player && player.x, y = player && player.y, hp = player && player.hp;
+      var r = up.apply(this, arguments);
+      if (c && estado() === 'PLAYING') {
+        player.x = x; player.y = y;
+        if (player.animState === 'walk') player.animState = 'idle';
+        gearState.meter = Math.min(100, gearState.meter + VEL * (dt || 0) * (1 + 0.1 * (typeof gearUp === 'function' ? gearUp('charge') : 0)));
+        if (player.hp < hp) player.hp -= (hp - player.hp) * 0.3;
+        if (gearState.meter >= 100 && !lleno) {   // estallido al llenarse
+          lleno = true;
+          if (typeof cameraShake !== 'undefined') cameraShake = Math.max(cameraShake, 3);
+          if (typeof playSound === 'function') playSound('levelup');
+          for (var i = 0; i < 26; i++) { var a = i / 26 * Math.PI * 2; humo.push({ x: player.x, y: player.y + 10, vx: Math.cos(a) * 90, vy: Math.sin(a) * 50 - 20, t: 0, v: 0.7, r: 7 }); }
+          if (typeof gearUpdateButton === 'function') gearUpdateButton();
+        }
+      }
+      if (gearState.meter < 100) lleno = false;
+      return r;
+    };
+    // aura humeante (capa transparente encima del juego, debajo del HUD)
+    var cv = document.createElement('canvas'); cv.id = 'op-aura'; document.body.appendChild(cv);
+    var g = cv.getContext('2d'), t0 = performance.now();
+    function dibujar(now) {
+      requestAnimationFrame(dibujar);
+      var dt = Math.min(0.05, (now - t0) / 1000); t0 = now;
+      var vis = (jugando() || estado() === 'PAUSED') && typeof cameraCenter === 'function' && player;
+      if (!vis || (!cargando() && !humo.length)) { if (cv.style.display !== 'none') { cv.style.display = 'none'; humo.length = 0; } return; }
+      cv.style.display = '';
+      var W = innerWidth, H = innerHeight;
+      if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+      g.clearRect(0, 0, W, H);
+      var rc = canvas.getBoundingClientRect(), cc = cameraCenter(), kx = rc.width / VIEW_W, ky = rc.height / VIEW_H;
+      function sx(x) { return rc.left + (x - cc[0] + VIEW_W / 2) * kx; }
+      function sy(y) { return rc.top + (y - cc[1] + VIEW_H / 2) * ky; }
+      var col = COL[selectedCharacter] || '#e5e7eb';
+      if (cargando() && jugando()) {
+        for (var i = 0; i < 3; i++) {   // el humo sube por los costados para que se vea el personaje
+          var lado = Math.random() < 0.5 ? -1 : 1;
+          humo.push({ x: player.x + lado * (11 + Math.random() * 9), y: player.y + 16 - Math.random() * 30,
+            vx: lado * (4 + Math.random() * 10), vy: -35 - Math.random() * 40, t: 0, v: 0.7 + Math.random() * 0.4, r: 2.5 + Math.random() * 3 });
+        }
+        // aro de humo a los pies y brillo
+        var px = sx(player.x), py = sy(player.y), pul = 1 + Math.sin(now / 90) * 0.08;
+        var gr = g.createRadialGradient(px, py - 6 * ky, 4, px, py - 6 * ky, 34 * kx * pul);
+        gr.addColorStop(0, col + '55'); gr.addColorStop(1, col + '00');
+        g.fillStyle = gr; g.beginPath(); g.arc(px, py - 6 * ky, 34 * kx * pul, 0, 7); g.fill();
+        g.strokeStyle = 'rgba(240,240,240,.45)'; g.lineWidth = 3 * kx;
+        g.beginPath(); g.ellipse(px, py + 20 * ky, 22 * kx * pul, 7 * ky * pul, 0, 0, 7); g.stroke();
+      }
+      for (var j = humo.length - 1; j >= 0; j--) {
+        var h = humo[j]; h.t += dt;
+        if (h.t >= h.v) { humo.splice(j, 1); continue; }
+        if (jugando()) { h.x += h.vx * dt; h.y += h.vy * dt; h.vx *= 0.97; }
+        var f = h.t / h.v, rad = (h.r + f * 6) * kx;
+        g.globalAlpha = (1 - f) * 0.38;
+        g.fillStyle = f < 0.25 ? col : '#f3f4f6';
+        g.beginPath(); g.arc(sx(h.x), sy(h.y), rad, 0, 7); g.fill();
+      }
+      g.globalAlpha = 1;
+      if (humo.length > 220) humo.splice(0, humo.length - 220);
+    }
+    requestAnimationFrame(dibujar);
+  });
+
   // ─── Pantallas propias (mismo cartel que las del juego) ───
   function pantalla(id, titulo, sub, html, alCerrar) {
     var s = $(id);

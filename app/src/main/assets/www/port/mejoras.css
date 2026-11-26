@@ -70,3 +70,13 @@ body.op-sin-fps #op-fps, body.op-sin-dps .op-dps { display: none; }
 .op-pant .op-scroll{display:block;max-height:62vh;overflow-y:auto;padding:0 4px}
 .op-pant .op-board{max-width:min(560px,94vw)}
 #start-screen .op-continuar{background:#a6e35a!important;color:#142b05!important;border-color:#4d7a16!important}
+
+/* ─── CARGAR (aura humeante) ─── */
+#op-aura { position: fixed; inset: 0; z-index: 7; pointer-events: none; background: transparent !important; }
+#op-carga { position: fixed; z-index: 40; right: calc(90px + env(safe-area-inset-right)); bottom: calc(74px + env(safe-area-inset-bottom));
+  width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: auto;
+  font-family: 'Bangers', sans-serif; font-size: 13px; letter-spacing: .5px; color: #f5e6c8; background: rgba(28,17,7,.85);
+  border: 3px solid #8a6a3a; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+#op-carga.on { color: #241508; background: #f3f4f6; border-color: #fff; box-shadow: 0 0 14px 4px rgba(255,255,255,.55); transform: scale(.94); }
+#op-carga.op-lleno { border-color: #facc15; color: #facc15; }
+#op-carga.op-off { opacity: .4; }

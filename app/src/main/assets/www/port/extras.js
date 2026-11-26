@@ -382,7 +382,18 @@
     OP.cargando = cargando;
     var b = document.createElement('button');
     b.id = 'op-carga'; b.type = 'button'; b.innerHTML = '<span>CARGAR</span>';
-    function on(e) { e.preventDefault(); e.stopPropagation(); dedo = true; }
+    var avisoT = 0;
+    function on(e) {
+      e.preventDefault(); e.stopPropagation(); dedo = true;
+      if (gearChar() && gearCardLevel() <= 0 && Date.now() > avisoT) {   // aún sin la carta: decir cuál hace falta
+        avisoT = Date.now() + 4000;
+        var CARTA = { luffy: 'Gears (Luffy)', zoro: 'Haki del Rey (Zoro)', sanji: 'Raid Suit (Sanji)', nami: 'Clima-Tact (Nami)',
+          usopp: 'Rey de los Francotiradores (Usopp)', chopper: 'Rumble Ball (Chopper)', robin: 'Hana Hana no Mi (Robin)',
+          franky: 'Cyborg de Cola (Franky)', brook: 'Yomi Yomi no Mi (Brook)', jinbe: 'Karate de Hombre-Pez (Jinbe)' };
+        var id = FORM_CARD[gearChar()], m = window.UPGRADE_POOL_MAP && window.UPGRADE_POOL_MAP[id];
+        toast('Para cargar necesitas la carta «' + ((m && m.title) || CARTA[gearChar()] || id) + '» al subir de nivel');
+      }
+    }
     function off(e) { if (e) e.stopPropagation(); dedo = false; }
     b.addEventListener('touchstart', on, { passive: false });
     b.addEventListener('touchend', off); b.addEventListener('touchcancel', off);
@@ -392,7 +403,7 @@
     window.addEventListener('keyup', function (e) { if (e.key === 'c' || e.key === 'C') tecla = false; });
     window.addEventListener('blur', function () { tecla = dedo = false; });
     setInterval(function () {
-      var ver = O.carga && jugando() && gearChar() && gearCardLevel() > 0;
+      var ver = O.carga && jugando() && gearChar();   // visible siempre; apagado hasta tener la carta
       b.style.display = ver ? '' : 'none';
       b.classList.toggle('op-off', !!ver && !puede());
       b.classList.toggle('op-lleno', !!ver && gearState.meter >= 100);

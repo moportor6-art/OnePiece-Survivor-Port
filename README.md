@@ -56,6 +56,11 @@ cofres y logros.
     Demonio Fleur, God Usopp, General Franky y Franky Shogun, Chopper Monster Point (Heavy Point) y Sanji Ifrit Jambe.
   - **CARGAR** (botón junto al de Gear, o mantener C): llena el medidor de transformación de cualquier personaje con un
     aura humeante de su color; mientras cargas te quedas quieto y recibes un 30 % más de daño. Estallido de humo al llenarse.
+  - **0.5 · Isla desconocida** (`www/port/islas.js` + `www/port/worldgen.js`, del repo
+    [worldgen](https://github.com/moportor6-art/worldgen)): botón nuevo en la selección de isla. Cada semilla crea
+    una isla distinta, con costa, playa, oleaje, árboles, rocas y casas que bloquean de verdad. Cuatro biomas:
+    Desierto (enemigos y jefe de Alabasta), Nieve (Drum), Selva (Syrup) y Puerto (Shell Town). «⟳ Nueva isla» cambia
+    la semilla; la elegida se guarda y se ve en el menú para repetirla.
 - `tools/parches.py`: los únicos 3 cambios dentro del código del juego (color de los críticos y el gancho del medidor
   de daño). Se vuelven a aplicar solos en cada actualización; si el juego cambia y ya no encajan, la mejora se apaga sola.
 

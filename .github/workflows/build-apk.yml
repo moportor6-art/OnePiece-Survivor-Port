@@ -32,6 +32,7 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0
           node tests/smoke.cjs app/src/main/assets/www capturas
+          node tests/islas.cjs app/src/main/assets/www capturas
       - uses: actions/upload-artifact@v4
         if: always()
         with:
